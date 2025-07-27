@@ -1,177 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixcom - Sorteio Pix</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <meta name="theme-color" content="#1a202c">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #1a202c;
-      color: #e2e8f0;
-      padding: 2rem;
-    }
-    .hidden { display: none; }
-    .input-field {
-      width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border-radius: 0.5rem;
-      background-color: #4a5568;
-      border: 1px solid #4a5568;
-      color: #e2e8f0;
-    }
-    .btn {
-      background-color: #4299e1;
-      color: white;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      font-weight: bold;
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
+const CACHE_NAME = 'pixcom-cache-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/admin.html',
+  '/manifest.json',
+  '/service-worker.js',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
+];
 
-<!-- TELA DE PARTICIPAÇÃO -->
-<section id="mainView">
-  <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow">
-    <h1 class="text-2xl font-bold text-pink-400 mb-2 text-center">Pixcom - Sorteio Pix Instagram!</h1>
-    <p class="text-center mb-4">Inscreva-se para participar e ganhar um Pix!</p>
-    <p class="mb-4 text-center">Status: <span id="statusText" class="text-yellow-300">Carregando...</span></p>
-    <input type="text" id="instagramHandle" class="input-field" placeholder="@seuinstagram">
-    <input type="text" id="pixKey" class="input-field" placeholder="Chave Pix">
-    <button id="registerButton" class="btn">Quero Participar!</button>
-    <p class="mt-6 font-bold text-green-400 text-center">Participantes</p>
-    <div id="loadingParticipants" class="text-sm text-center">Carregando participantes...</div>
-    <ul id="participantsList" class="text-sm list-disc pl-4 hidden"></ul>
-    <p class="text-xs text-center mt-2">Seu ID: <span id="userIdDisplay" class="font-mono"></span></p>
-    <p class="text-center mt-4"><a href="#" id="adminLink" class="text-blue-400 text-sm underline">Acesso Admin</a></p>
-  </div>
-</section>
-
-<!-- LOGIN ADMIN -->
-<section id="loginView" class="hidden">
-  <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow">
-    <h2 class="text-xl font-bold text-yellow-400 mb-4 text-center">Login do Admin</h2>
-    <input type="email" id="adminEmail" class="input-field" placeholder="Email">
-    <input type="password" id="adminPassword" class="input-field" placeholder="Senha">
-    <button id="adminLoginBtn" class="btn">Entrar</button>
-  </div>
-</section>
-
-<!-- PAINEL ADMIN -->
-<section id="adminPanelView" class="hidden">
-  <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-xl font-bold text-yellow-400">Painel Admin</h2>
-      <button id="logoutBtn" class="text-red-500">Sair</button>
-    </div>
-    <button id="toggleReg" class="btn mb-4 bg-yellow-500">Alternar Inscrição</button>
-    <button id="drawWinner" class="btn bg-green-500 mb-4">Sortear Vencedor</button>
-    <h3 class="text-green-400 font-bold mb-2">Participantes:</h3>
-    <ul id="adminParticipantsList" class="text-sm list-disc pl-4"></ul>
-  </div>
-</section>
-
-<!-- FIREBASE E SCRIPT -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDoc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, signInAnonymously, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SUA_AUTH_DOMAIN",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_BUCKET",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-let userId = null;
-let regStatusDoc = doc(db, "config", "status");
-let participantesCol = collection(db, "participantes");
-
-// DOM
-const mainView = document.getElementById("mainView");
-const loginView = document.getElementById("loginView");
-const adminPanelView = document.getElementById("adminPanelView");
-
-document.getElementById("adminLink").onclick = () => {
-  mainView.classList.add("hidden");
-  loginView.classList.remove("hidden");
-};
-
-document.getElementById("adminLoginBtn").onclick = async () => {
-  const email = document.getElementById("adminEmail").value;
-  const senha = document.getElementById("adminPassword").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, senha);
-    loginView.classList.add("hidden");
-    adminPanelView.classList.remove("hidden");
-    carregarParticipantesAdmin();
-  } catch (e) {
-    alert("Erro no login!");
-  }
-};
-
-document.getElementById("logoutBtn").onclick = async () => {
-  await signOut(auth);
-  adminPanelView.classList.add("hidden");
-  mainView.classList.remove("hidden");
-};
-
-document.getElementById("registerButton").onclick = async () => {
-  const insta = document.getElementById("instagramHandle").value;
-  const pix = document.getElementById("pixKey").value;
-  if (!insta || !pix) return alert("Preencha os campos");
-  await setDoc(doc(participantesCol, userId), { instagram: insta, pix });
-};
-
-const carregarParticipantesAdmin = () => {
-  onSnapshot(participantesCol, snapshot => {
-    const ul = document.getElementById("adminParticipantsList");
-    ul.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      const li = document.createElement("li");
-      li.textContent = `${d.instagram} - ${d.pix}`;
-      ul.appendChild(li);
-    });
-  });
-};
-
-signInAnonymously(auth).then(cred => {
-  userId = cred.user.uid;
-  document.getElementById("userIdDisplay").textContent = userId;
-
-  onSnapshot(participantesCol, snapshot => {
-    const ul = document.getElementById("participantsList");
-    ul.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      const li = document.createElement("li");
-      li.textContent = d.instagram;
-      ul.appendChild(li);
-    });
-    document.getElementById("loadingParticipants").classList.add("hidden");
-    ul.classList.remove("hidden");
-  });
-
-  onSnapshot(regStatusDoc, docSnap => {
-    const s = docSnap.data()?.aberto;
-    document.getElementById("statusText").textContent = s ? "Aberto" : "Fechado";
-  });
+// Instala o service worker
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
 });
-</script>
-</body>
-</html>
+
+// Ativa e remove caches antigos
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames =>
+      Promise.all(
+        cacheNames.map(name => {
+          if (name !== CACHE_NAME) return caches.delete(name);
+        })
+      )
+    )
+  );
+});
+
+// Intercepta requisições
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
+  );
+});
