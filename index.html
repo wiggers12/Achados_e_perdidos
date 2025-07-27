@@ -1,70 +1,242 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pixcom - Sorteio Pix Instagram!</title>
-    <base href="/Doce-sabor/">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pixcom - Sorteio Pix Instagram!</title>
+  <base href="/Doce-sabor/">
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Fonte Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Manifest PWA -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a202c">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a202c">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #1a202c;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+    .container {
+      background-color: #2d3748;
+      border-radius: 1rem;
+      padding: 2rem;
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+    .input-field {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background-color: #4a5568;
+      color: #e2e8f0;
+      border: 1px solid #4a5568;
+      margin-bottom: 1rem;
+    }
+    .btn-primary {
+      background-color: #4299e1;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
 </head>
-<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
-    <div class="container max-w-lg w-full bg-gray-800 rounded-lg p-6 shadow-lg text-center">
-        <h1 class="text-3xl font-bold text-pink-400 mb-4">Pixcom - Sorteio Pix</h1>
-        <p class="mb-6 text-gray-300">Participe com seu Instagram e chave Pix!</p>
+<body>
+  <div class="container">
+    <h1 class="text-4xl font-bold mb-4 text-pink-400">Pixcom - Sorteio Pix Instagram!</h1>
+    <p class="text-lg mb-6">Inscreva-se para participar e ganhar um Pix!</p>
 
-        <div id="registrationStatus" class="mb-4 text-lg font-semibold">
-            Status: <span id="statusText" class="text-yellow-300">Carregando...</span>
-        </div>
-
-        <div id="registrationForm">
-            <input type="text" id="instagramHandle" placeholder="@seuinstagram" class="input-field" required />
-            <input type="text" id="pixKey" placeholder="Sua chave Pix" class="input-field" required />
-            <button id="registerButton" class="btn-primary w-full">Quero Participar!</button>
-        </div>
-
-        <div id="winnerSection" class="mt-8 hidden">
-            <h2 class="text-2xl font-bold text-purple-400">Vencedor:</h2>
-            <p id="winnerHandle" class="text-xl text-white"></p>
-        </div>
-
-        <div class="mt-8">
-            <h2 class="text-xl font-bold text-green-400 mb-2">Participantes</h2>
-            <div id="loadingParticipants" class="text-center text-sm text-gray-400">Carregando...</div>
-            <ul id="participantsList" class="hidden text-left mt-4 list-disc list-inside"></ul>
-            <p class="text-xs text-gray-500 mt-4">Seu ID: <span id="userIdDisplay" class="font-mono break-all"></span></p>
-        </div>
-
-        <div class="mt-6 text-sm text-blue-400">
-            <a href="admin.html" class="hover:underline">Acesso Admin</a>
-        </div>
+    <div id="registrationStatus" class="mb-4 text-xl font-semibold text-center">
+      Status: <span id="statusText" class="text-yellow-300">Carregando...</span>
     </div>
 
-    <!-- Caixa de mensagem -->
-    <div id="messageBox" class="message-box">
-        <h3 id="messageTitle" class="text-2xl font-bold mb-4"></h3>
-        <p id="messageContent" class="text-lg mb-6"></p>
-        <button id="messageButton">Ok</button>
+    <div id="registrationForm">
+      <input type="text" id="instagramHandle" placeholder="@seuinstagram" class="input-field" required />
+      <input type="text" id="pixKey" placeholder="Chave Pix" class="input-field" required />
+      <button id="registerButton" class="btn-primary w-full">Quero Participar!</button>
     </div>
 
-    <!-- Firebase + lógica (adicione seu JS aqui ou separe em app.js) -->
+    <div id="winnerSection" class="mt-8 hidden">
+      <h2 class="text-3xl font-bold mb-4 text-purple-400">Vencedor!</h2>
+      <p class="text-2xl font-bold text-white"><span id="winnerHandle"></span></p>
+    </div>
 
-    <!-- PWA: Registro do Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-                .then(() => console.log('✅ Service Worker registrado com sucesso'))
-                .catch(error => console.error('❌ Erro ao registrar Service Worker:', error));
+    <div class="mt-8">
+      <h2 class="text-3xl font-bold mb-4 text-green-400">Participantes</h2>
+      <div id="loadingParticipants" class="text-center py-4">Carregando participantes...</div>
+      <ul id="participantsList" class="list-disc list-inside text-left hidden"></ul>
+      <p class="text-sm mt-4 text-gray-400">Seu ID: <span id="userIdDisplay" class="font-mono text-gray-300 break-all"></span></p>
+    </div>
+
+    <div class="mt-8 text-center">
+      <a href="admin.html" class="text-blue-400 hover:underline text-sm">Acesso Admin</a>
+    </div>
+  </div>
+
+  <!-- Firebase + lógica -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc,
+      collection,
+      onSnapshot,
+      query
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDgal4Xbc-OCqYXilXsYUP5tqM-Yu85t_0",
+      authDomain: "smart-money-da982.firebaseapp.com",
+      projectId: "smart-money-da982",
+      storageBucket: "smart-money-da982.appspot.com",
+      messagingSenderId: "1089903434173",
+      appId: "1:1089903434173:web:b25fd6213e59c3c423dad4",
+      measurementId: "G-QDJKW4W74W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let userId = null;
+    const instagramHandleInput = document.getElementById('instagramHandle');
+    const pixKeyInput = document.getElementById('pixKey');
+    const registerButton = document.getElementById('registerButton');
+    const participantsList = document.getElementById('participantsList');
+    const loadingParticipants = document.getElementById('loadingParticipants');
+    const userIdDisplay = document.getElementById('userIdDisplay');
+    const registrationForm = document.getElementById('registrationForm');
+    const statusText = document.getElementById('statusText');
+    const winnerSection = document.getElementById('winnerSection');
+    const winnerHandle = document.getElementById('winnerHandle');
+
+    async function authenticateUser() {
+      try {
+        const result = await signInAnonymously(auth);
+        userId = result.user.uid;
+        userIdDisplay.textContent = userId;
+        loadParticipants();
+        loadSorteioStatus();
+      } catch (error) {
+        console.error("Erro na autenticação:", error);
+        userId = crypto.randomUUID();
+        userIdDisplay.textContent = userId;
+      }
+    }
+
+    async function registerParticipant() {
+      const instagram = instagramHandleInput.value.trim();
+      const pix = pixKeyInput.value.trim();
+
+      if (!instagram.startsWith('@') || !pix) {
+        alert("Preencha os dados corretamente.");
+        return;
+      }
+
+      registerButton.disabled = true;
+      registerButton.textContent = 'Registrando...';
+
+      try {
+        const ref = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`, userId);
+        await setDoc(ref, {
+          instagramHandle: instagram,
+          pixKey: pix,
+          userId: userId,
+          timestamp: new Date()
+        });
+        alert("Registrado com sucesso!");
+        instagramHandleInput.value = '';
+        pixKeyInput.value = '';
+      } catch (e) {
+        alert("Erro ao registrar. Tente novamente.");
+      } finally {
+        registerButton.disabled = false;
+        registerButton.textContent = 'Quero Participar!';
+      }
+    }
+
+    async function loadParticipants() {
+      const q = query(collection(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`));
+      onSnapshot(q, snapshot => {
+        participantsList.innerHTML = '';
+        if (snapshot.empty) {
+          participantsList.innerHTML = '<li class="text-gray-400">Nenhum participante ainda.</li>';
+        } else {
+          snapshot.forEach(doc => {
+            const p = doc.data();
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${p.instagramHandle}</strong> - Pix: ${p.pixKey.substring(0, 4)}...`;
+            participantsList.appendChild(li);
+          });
         }
-    </script>
+        participantsList.classList.remove('hidden');
+        loadingParticipants.classList.add('hidden');
+      });
+    }
+
+    function loadSorteioStatus() {
+      const statusRef = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
+      onSnapshot(statusRef, snap => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data.isOpen) {
+            statusText.textContent = 'Inscrições Abertas!';
+            registrationForm.classList.remove('hidden');
+          } else {
+            statusText.textContent = 'Inscrições Encerradas!';
+            registrationForm.classList.add('hidden');
+          }
+
+          if (data.winnerHandle) {
+            winnerHandle.textContent = data.winnerHandle;
+            winnerSection.classList.remove('hidden');
+            statusText.textContent = 'Sorteio Realizado!';
+          }
+        } else {
+          setDoc(statusRef, { isOpen: true, winnerHandle: null });
+          statusText.textContent = 'Inscrições Abertas!';
+        }
+      });
+    }
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userId = user.uid;
+        userIdDisplay.textContent = userId;
+        loadParticipants();
+        loadSorteioStatus();
+      } else {
+        authenticateUser();
+      }
+    });
+
+    registerButton.addEventListener('click', registerParticipant);
+  </script>
+
+  <!-- Registrar Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✅ Service Worker registrado com sucesso!'))
+        .catch(error => console.error('❌ Erro no Service Worker:', error));
+    }
+  </script>
 </body>
 </html>
