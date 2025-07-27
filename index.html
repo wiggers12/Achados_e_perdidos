@@ -91,6 +91,8 @@
     appId: "1:414062499771:web:1a811377bc6bbf145f969e"
   };
 
+  const ADMIN_UID = "mv0x6ktWwfZHsIKotKnmrW9RQsY2"; // UID do admin
+
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -123,24 +125,38 @@
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      showView(adminPanel);
-      carregarParticipantesAdmin();
+      if (user.uid === ADMIN_UID) {
+        showView(adminPanel);
+        carregarParticipantesAdmin();
+      } else {
+        alert("Acesso negado. Você não é administrador.");
+        signOut(auth);
+      }
     } else {
       showView(mainView);
     }
   });
 
-  const userId = crypto.randomUUID();
-  document.getElementById("userIdDisplay").textContent = userId;
+  // ID único persistente
+  const savedId = localStorage.getItem("userId") || Math.random().toString(36).substr(2, 9);
+  localStorage.setItem("userId", savedId);
+  document.getElementById("userIdDisplay").textContent = savedId;
 
   document.getElementById("registerButton").onclick = async () => {
     const instagram = document.getElementById("instagramHandle").value.trim();
     const chavePix = document.getElementById("pixKey").value.trim();
     if (!instagram || !chavePix) return alert("Preencha todos os campos!");
-    await setDoc(doc(db, "participantes", userId), {
-      instagram, chavePix, data: new Date().toISOString()
-    });
-    alert("Inscrição confirmada!");
+
+    try {
+      await setDoc(doc(db, "participantes", savedId), {
+        instagram,
+        chavePix,
+        data: new Date().toISOString()
+      });
+      alert("Inscrição confirmada!");
+    } catch (e) {
+      alert("Erro ao salvar: " + e.message);
+    }
   };
 
   const carregarParticipantes = () => {
