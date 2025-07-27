@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pixcom - Painel Admin</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixcom - Admin</title>
   <base href="/Doce-sabor/">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -15,13 +15,13 @@
       padding: 1rem;
     }
     .input-field {
-      width: 100%;
+      background-color: #2d3748;
+      border: 1px solid #4a5568;
+      color: white;
       padding: 0.75rem;
       border-radius: 0.5rem;
-      background-color: #4a5568;
-      color: #e2e8f0;
-      border: 1px solid #4a5568;
       margin-bottom: 1rem;
+      width: 100%;
     }
     .btn {
       padding: 0.5rem 1rem;
@@ -29,53 +29,47 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .btn-primary {
-      background-color: #4299e1;
-      color: white;
-    }
-    .btn-danger {
-      background-color: #e53e3e;
-      color: white;
-    }
+    .btn-primary { background-color: #4299e1; color: white; }
+    .btn-danger { background-color: #e53e3e; color: white; }
   </style>
 </head>
 <body>
-  <div id="loginSection" class="max-w-md mx-auto mt-10">
-    <h1 class="text-3xl font-bold mb-4 text-yellow-400 text-center">Login Admin</h1>
-    <input type="email" id="adminEmail" class="input-field" placeholder="Email do administrador" />
-    <input type="password" id="adminPassword" class="input-field" placeholder="Senha" />
-    <button id="loginButton" class="btn btn-primary w-full">Entrar</button>
+  <div id="loginPanel" class="max-w-md mx-auto mt-20">
+    <h1 class="text-3xl font-bold text-yellow-400 mb-4 text-center">Login do Admin</h1>
+    <input type="email" id="email" placeholder="Email" class="input-field">
+    <input type="password" id="password" placeholder="Senha" class="input-field">
+    <button id="loginBtn" class="btn btn-primary w-full">Entrar</button>
   </div>
 
-  <div id="adminPanel" class="hidden max-w-5xl mx-auto mt-10">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold text-yellow-400">Painel de Administração</h1>
-      <button id="logoutButton" class="btn btn-danger">Sair</button>
+  <div id="adminPanel" class="hidden max-w-5xl mx-auto">
+    <div class="flex justify-between items-center my-6">
+      <h2 class="text-2xl font-bold text-yellow-400">Painel Administrativo</h2>
+      <button id="logoutBtn" class="btn btn-danger">Sair</button>
     </div>
 
-    <div class="bg-gray-700 p-4 rounded mb-6">
-      <div class="flex flex-col md:flex-row gap-4 items-center">
-        <p class="text-lg">Status do Sorteio: <span id="statusText" class="font-bold text-yellow-300">Carregando...</span></p>
-        <button id="toggleStatusBtn" class="btn btn-primary">Alternar Inscrições</button>
-        <button id="drawWinnerBtn" class="btn btn-primary">Sortear Vencedor</button>
+    <div class="bg-gray-700 p-4 rounded-lg mb-6">
+      <p class="mb-2">Status do Sorteio: <span id="statusText" class="font-semibold text-yellow-300">...</span></p>
+      <div class="flex flex-col sm:flex-row gap-4">
+        <button id="toggleBtn" class="btn btn-primary">Alternar Inscrições</button>
+        <button id="sortearBtn" class="btn btn-primary">Sortear Vencedor</button>
       </div>
-      <div id="winnerInfo" class="mt-4 hidden">
-        <p>Vencedor: <span id="winnerHandle" class="font-semibold text-purple-400"></span></p>
-        <p>Pix: <span id="winnerPixKey" class="text-gray-300 font-mono"></span></p>
+      <div id="winnerBox" class="mt-4 hidden">
+        <p>🎉 Vencedor: <span id="winnerHandle" class="font-bold text-purple-400"></span></p>
+        <p>Chave Pix: <span id="winnerPix" class="font-mono text-gray-300"></span></p>
       </div>
     </div>
 
-    <h2 class="text-xl font-semibold mb-2 text-green-400">Participantes</h2>
-    <table class="w-full bg-gray-700 rounded text-sm">
+    <h3 class="text-lg font-bold text-green-400 mb-2">Lista de Participantes</h3>
+    <table class="w-full bg-gray-800 rounded-lg overflow-hidden text-sm">
       <thead>
-        <tr class="text-left text-gray-300 border-b border-gray-600">
+        <tr class="text-left border-b border-gray-600 text-gray-300">
           <th class="p-2">@ Instagram</th>
           <th class="p-2">Pix</th>
           <th class="p-2">ID</th>
           <th class="p-2">Data</th>
         </tr>
       </thead>
-      <tbody id="participantsTable"></tbody>
+      <tbody id="tableBody" class="text-gray-200"></tbody>
     </table>
   </div>
 
@@ -83,14 +77,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import {
-      getFirestore,
-      doc,
-      setDoc,
-      getDoc,
-      onSnapshot,
-      getDocs,
-      collection,
-      query
+      getFirestore, doc, setDoc, getDoc,
+      collection, onSnapshot, query, getDocs
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -99,105 +87,93 @@
       projectId: "smart-money-da982",
       storageBucket: "smart-money-da982.appspot.com",
       messagingSenderId: "1089903434173",
-      appId: "1:1089903434173:web:b25fd6213e59c3c423dad4",
-      measurementId: "G-QDJKW4W74W"
+      appId: "1:1089903434173:web:b25fd6213e59c3c423dad4"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const loginSection = document.getElementById('loginSection');
-    const adminPanel = document.getElementById('adminPanel');
-    const loginButton = document.getElementById('loginButton');
-    const logoutButton = document.getElementById('logoutButton');
-    const adminEmail = document.getElementById('adminEmail');
-    const adminPassword = document.getElementById('adminPassword');
-    const statusText = document.getElementById('statusText');
-    const toggleStatusBtn = document.getElementById('toggleStatusBtn');
-    const drawWinnerBtn = document.getElementById('drawWinnerBtn');
-    const winnerInfo = document.getElementById('winnerInfo');
-    const winnerHandle = document.getElementById('winnerHandle');
-    const winnerPixKey = document.getElementById('winnerPixKey');
-    const participantsTable = document.getElementById('participantsTable');
+    const loginPanel = document.getElementById("loginPanel");
+    const adminPanel = document.getElementById("adminPanel");
+    const loginBtn = document.getElementById("loginBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const statusText = document.getElementById("statusText");
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sortearBtn = document.getElementById("sortearBtn");
+    const winnerBox = document.getElementById("winnerBox");
+    const winnerHandle = document.getElementById("winnerHandle");
+    const winnerPix = document.getElementById("winnerPix");
+    const tableBody = document.getElementById("tableBody");
 
-    loginButton.addEventListener('click', async () => {
-      try {
-        await signInWithEmailAndPassword(auth, adminEmail.value, adminPassword.value);
-      } catch (err) {
-        alert("Erro no login: " + err.message);
-      }
-    });
+    const statusDoc = doc(db, "artifacts/smart-money-da982/public/data/giveaway_status");
+    const participantesRef = collection(db, "artifacts/smart-money-da982/public/data/giveaway_participants");
 
-    logoutButton.addEventListener('click', async () => {
-      await signOut(auth);
-    });
+    loginBtn.onclick = () => {
+      signInWithEmailAndPassword(auth, email.value, password.value)
+        .catch(err => alert("Erro: " + err.message));
+    };
+
+    logoutBtn.onclick = () => signOut(auth);
 
     onAuthStateChanged(auth, user => {
       if (user) {
-        loginSection.classList.add('hidden');
-        adminPanel.classList.remove('hidden');
-        loadStatus();
-        loadParticipants();
+        loginPanel.classList.add("hidden");
+        adminPanel.classList.remove("hidden");
+        carregarStatus();
+        carregarParticipantes();
       } else {
-        loginSection.classList.remove('hidden');
-        adminPanel.classList.add('hidden');
+        loginPanel.classList.remove("hidden");
+        adminPanel.classList.add("hidden");
       }
     });
 
-    async function loadStatus() {
-      const ref = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
-      onSnapshot(ref, snap => {
+    toggleBtn.onclick = async () => {
+      const snap = await getDoc(statusDoc);
+      const atual = snap.exists() ? snap.data().isOpen : true;
+      await setDoc(statusDoc, { isOpen: !atual }, { merge: true });
+    };
+
+    sortearBtn.onclick = async () => {
+      const docs = await getDocs(query(participantesRef));
+      const lista = docs.docs.map(d => d.data());
+      if (!lista.length) return alert("Sem participantes.");
+      const sorteado = lista[Math.floor(Math.random() * lista.length)];
+      await setDoc(statusDoc, {
+        winnerHandle: sorteado.instagramHandle,
+        winnerPixKey: sorteado.pixKey,
+        isOpen: false
+      }, { merge: true });
+    };
+
+    function carregarStatus() {
+      onSnapshot(statusDoc, snap => {
         const data = snap.data();
         if (!data) return;
-
         statusText.textContent = data.isOpen ? "Abertas" : "Encerradas";
         if (data.winnerHandle) {
-          winnerInfo.classList.remove('hidden');
+          winnerBox.classList.remove("hidden");
           winnerHandle.textContent = data.winnerHandle;
-          winnerPixKey.textContent = data.winnerPixKey;
+          winnerPix.textContent = data.winnerPixKey;
         }
       });
     }
 
-    toggleStatusBtn.addEventListener('click', async () => {
-      const ref = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
-      const snap = await getDoc(ref);
-      const current = snap.exists() && snap.data().isOpen;
-      await setDoc(ref, { isOpen: !current }, { merge: true });
-    });
-
-    drawWinnerBtn.addEventListener('click', async () => {
-      const colRef = collection(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`);
-      const docs = await getDocs(query(colRef));
-      const participantes = [];
-      docs.forEach(d => participantes.push(d.data()));
-      if (!participantes.length) return alert("Nenhum participante.");
-
-      const winner = participantes[Math.floor(Math.random() * participantes.length)];
-      const statusRef = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
-      await setDoc(statusRef, {
-        winnerHandle: winner.instagramHandle,
-        winnerPixKey: winner.pixKey,
-        isOpen: false
-      }, { merge: true });
-    });
-
-    function loadParticipants() {
-      const ref = collection(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`);
-      onSnapshot(ref, snap => {
-        participantsTable.innerHTML = '';
+    function carregarParticipantes() {
+      onSnapshot(participantesRef, snap => {
+        tableBody.innerHTML = "";
         snap.forEach(doc => {
-          const p = doc.data();
-          const row = document.createElement('tr');
-          row.className = "border-b border-gray-600";
+          const d = doc.data();
+          const row = document.createElement("tr");
           row.innerHTML = `
-            <td class="p-2 text-blue-300">${p.instagramHandle}</td>
-            <td class="p-2 font-mono">${p.pixKey}</td>
-            <td class="p-2 text-xs break-all">${p.userId}</td>
-            <td class="p-2 text-xs">${new Date(p.timestamp?.seconds * 1000 || Date.now()).toLocaleString()}</td>
+            <td class="p-2 text-blue-300">${d.instagramHandle}</td>
+            <td class="p-2 font-mono">${d.pixKey}</td>
+            <td class="p-2 text-xs">${d.userId.substring(0, 8)}...</td>
+            <td class="p-2 text-xs">${new Date(d.timestamp?.seconds * 1000).toLocaleString()}</td>
           `;
-          participantsTable.appendChild(row);
+          tableBody.appendChild(row);
         });
       });
     }
