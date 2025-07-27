@@ -142,26 +142,26 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+        import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-        // Sua configuração do Firebase para o projeto 'smart-money-da982'
-        const firebaseConfig = {
-            apiKey: "AIzaSyDgal4Xbc-OCqYXilXsYUP5tqM-Yu85t_0",
-            authDomain: "smart-money-da982.firebaseapp.com",
-            projectId: "smart-money-da982",
-            storageBucket: "smart-money-da982.firebasestorage.app",
-            messagingSenderId: "1089903434173",
-            appId: "1:1089903434173:web:b25fd6213e59c3c423dad4",
-            measurementId: "G-QDJKW4W74W"
-        };
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
+  authDomain: "doce-sabor-caseiro.firebaseapp.com",
+  projectId: "doce-sabor-caseiro",
+  storageBucket: "doce-sabor-caseiro.firebasestorage.app",
+  messagingSenderId: "414062499771",
+  appId: "1:414062499771:web:1a811377bc6bbf145f969e",
+  measurementId: "G-KMC0FC7Z4H"
+};
 
-        // Inicializa o Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
         window.firebaseAuth = auth; // <-- ADICIONADO: Expõe o objeto 'auth' globalmente para acesso via console
 
         let userId = null; // ID do usuário atual
