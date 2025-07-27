@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixcom - Painel Admin</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Fundo escuro */
+            color: #e2e8f0; /* Texto claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #2d3748; /* Fundo escuro ligeiramente mais claro */
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px; /* Mais largo para a tabela */
+            text-align: center;
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            background-color: #4a5568;
+            color: #e2e8f0;
+            border: 1px solid #4a5568;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+        .btn-primary {
+            background-color: #4299e1;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #3182ce;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background-color: #e53e3e;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .btn-danger:hover {
+            background-color: #c53030;
+            transform: translateY(-2px);
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2d3748;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            text-align: center;
+            max-width: 90%;
+            display: none; /* Escondido por padrão */
+        }
+        .message-box button {
+            background-color: #4299e1;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            margin-top: 1rem;
+        }
+        .message-box button:hover {
+            background-color: #3182ce;
+        }
+    </style>
+</head>
+<body>
+    <div id="authSection" class="container">
+        <h1 class="text-4xl font-bold mb-6 text-yellow-400">Acesso Admin</h1>
+        <div class="mb-4">
+            <label for="adminEmail" class="block text-gray-300 text-sm font-bold mb-2">Email:</label>
+            <input type="email" id="adminEmail" placeholder="admin@exemplo.com" class="input-field" required>
+        </div>
+        <div class="mb-6">
+            <label for="adminPassword" class="block text-gray-300 text-sm font-bold mb-2">Senha:</label>
+            <input type="password" id="adminPassword" placeholder="Sua senha" class="input-field" required>
+        </div>
+        <button id="loginButton" class="btn-primary w-full">Entrar</button>
+    </div>
+
+    <div id="adminPanel" class="container hidden">
+        <h1 class="text-4xl font-bold mb-4 text-yellow-400">Painel de Administração</h1>
+        <button id="logoutButton" class="btn-danger absolute top-4 right-4">Sair</button>
+        <a href="/" class="text-blue-400 hover:underline text-sm absolute top-4 left-4">Voltar ao Sorteio</a>
+
+        <div class="mb-6 mt-12 p-4 bg-gray-700 rounded-lg">
+            <h2 class="text-2xl font-bold mb-2 text-white">Controle do Sorteio</h2>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-300 font-semibold">Inscrições:</span>
+                    <span id="adminStatusText" class="text-yellow-300 font-bold">Carregando...</span>
+                </div>
+                <button id="toggleRegistrationButton" class="btn-primary">
+                    Alternar Status
+                </button>
+                <button id="selectWinnerButton" class="btn-primary">
+                    Sortear Vencedor!
+                </button>
+            </div>
+            <div id="adminWinnerSection" class="mt-4 hidden">
+                <p class="text-xl font-bold text-purple-400">Vencedor Atual: <span id="adminWinnerHandle"></span></p>
+                <p class="text-md text-gray-400">Chave Pix: <span id="adminWinnerPixKey" class="font-mono"></span></p>
+            </div>
+        </div>
+
+        <div class="mt-8">
+            <h2 class="text-3xl font-bold mb-4 text-green-400">Todos os Participantes</h2>
+            <div id="loadingAdminParticipants" class="text-center py-4">Carregando participantes...</div>
+            <table class="min-w-full bg-gray-700 rounded-lg shadow-inner hidden" id="adminParticipantsTable">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b border-gray-600 text-left text-sm font-semibold text-gray-300">@ Instagram</th>
+                        <th class="py-2 px-4 border-b border-gray-600 text-left text-sm font-semibold text-gray-300">Chave Pix</th>
+                        <th class="py-2 px-4 border-b border-gray-600 text-left text-sm font-semibold text-gray-300">ID Usuário</th>
+                        <th class="py-2 px-4 border-b border-gray-600 text-left text-sm font-semibold text-gray-300">Data Inscrição</th>
+                    </tr>
+                </thead>
+                <tbody id="adminParticipantsTableBody">
+                    <!-- Participantes serão carregados aqui -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="messageBox" class="message-box">
+        <h3 id="messageTitle" class="text-2xl font-bold mb-4"></h3>
+        <p id="messageContent" class="text-lg mb-6"></p>
+        <button id="messageButton">Ok</button>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+        // Sua configuração do Firebase para o projeto 'smart-money-da982'
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgal4Xbc-OCqYXilXsYUP5tqM-Yu85t_0",
+            authDomain: "smart-money-da982.firebaseapp.com",
+            projectId: "smart-money-da982",
+            storageBucket: "smart-money-da982.firebasestorage.app",
+            messagingSenderId: "1089903434173",
+            appId: "1:1089903434173:web:b25fd6213e59c3c423dad4",
+            measurementId: "G-QDJKW4W74W"
+        };
+
+        // Inicializa o Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Elementos DOM
+        const authSection = document.getElementById('authSection');
+        const adminPanel = document.getElementById('adminPanel');
+        const adminEmailInput = document.getElementById('adminEmail');
+        const adminPasswordInput = document.getElementById('adminPassword');
+        const loginButton = document.getElementById('loginButton');
+        const logoutButton = document.getElementById('logoutButton');
+        const toggleRegistrationButton = document.getElementById('toggleRegistrationButton');
+        const selectWinnerButton = document.getElementById('selectWinnerButton');
+        const adminStatusText = document.getElementById('adminStatusText');
+        const adminWinnerSection = document.getElementById('adminWinnerSection');
+        const adminWinnerHandle = document.getElementById('adminWinnerHandle');
+        const adminWinnerPixKey = document.getElementById('adminWinnerPixKey');
+        const adminParticipantsTable = document.getElementById('adminParticipantsTable');
+        const adminParticipantsTableBody = document.getElementById('adminParticipantsTableBody');
+        const loadingAdminParticipants = document.getElementById('loadingAdminParticipants');
+
+        // Elementos da caixa de mensagem personalizada
+        const messageBox = document.getElementById('messageBox');
+        const messageTitle = document.getElementById('messageTitle');
+        const messageContent = document.getElementById('messageContent');
+        const messageButton = document.getElementById('messageButton');
+
+        /**
+         * Exibe uma caixa de mensagem personalizada.
+         * @param {string} title - O título da mensagem.
+         * @param {string} content - O conteúdo da mensagem.
+         * @param {function} [callback] - Função a ser executada ao fechar a caixa.
+         */
+        function showMessageBox(title, content, callback = null) {
+            messageTitle.textContent = title;
+            messageContent.textContent = content;
+            messageBox.style.display = 'block';
+            messageButton.onclick = () => {
+                messageBox.style.display = 'none';
+                if (callback) {
+                    callback();
+                }
+            };
+        }
+
+        /**
+         * Carrega o status do sorteio (aberto/fechado/vencedor) e a lista de participantes para o admin.
+         */
+        async function loadAdminData() {
+            // Listener para o status do sorteio
+            const giveawayStatusRef = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
+            onSnapshot(giveawayStatusRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const statusData = docSnap.data();
+                    if (statusData.isOpen) {
+                        adminStatusText.textContent = 'Abertas';
+                        adminStatusText.classList.remove('text-red-400');
+                        adminStatusText.classList.add('text-green-400');
+                        toggleRegistrationButton.textContent = 'Encerrar Inscrições';
+                    } else {
+                        adminStatusText.textContent = 'Encerradas';
+                        adminStatusText.classList.remove('text-green-400');
+                        adminStatusText.classList.add('text-red-400');
+                        toggleRegistrationButton.textContent = 'Abrir Inscrições';
+                    }
+                    if (statusData.winnerHandle) {
+                        adminWinnerHandle.textContent = statusData.winnerHandle;
+                        adminWinnerPixKey.textContent = statusData.winnerPixKey || 'N/A';
+                        adminWinnerSection.classList.remove('hidden');
+                        selectWinnerButton.disabled = true; // Desabilita o botão se já houver vencedor
+                        selectWinnerButton.textContent = 'Vencedor Sorteado';
+                    } else {
+                        adminWinnerSection.classList.add('hidden');
+                        selectWinnerButton.disabled = false;
+                        selectWinnerButton.textContent = 'Sortear Vencedor!';
+                    }
+                } else {
+                    // Inicializa o status se não existir
+                    setDoc(giveawayStatusRef, { isOpen: true, winnerHandle: null, winnerPixKey: null });
+                    adminStatusText.textContent = 'Abertas';
+                    adminStatusText.classList.remove('text-red-400');
+                    adminStatusText.classList.add('text-green-400');
+                    toggleRegistrationButton.textContent = 'Encerrar Inscrições';
+                    adminWinnerSection.classList.add('hidden');
+                    selectWinnerButton.disabled = false;
+                    selectWinnerButton.textContent = 'Sortear Vencedor!';
+                }
+            }, (error) => {
+                console.error("Erro ao carregar status do sorteio para admin: ", error);
+                adminStatusText.textContent = 'Erro';
+                adminStatusText.classList.add('text-red-400');
+            });
+
+            // Listener para todos os participantes (incluindo chaves Pix)
+            loadingAdminParticipants.classList.remove('hidden');
+            adminParticipantsTable.classList.add('hidden');
+            adminParticipantsTableBody.innerHTML = '';
+
+            const participantsCollectionRef = collection(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`);
+            onSnapshot(participantsCollectionRef, (querySnapshot) => {
+                adminParticipantsTableBody.innerHTML = ''; // Limpa antes de adicionar
+                if (querySnapshot.empty) {
+                    const row = adminParticipantsTableBody.insertRow();
+                    const cell = row.insertCell();
+                    cell.colSpan = 4;
+                    cell.classList.add('py-2', 'px-4', 'text-center', 'text-gray-400');
+                    cell.textContent = 'Nenhum participante registrado ainda.';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const p = doc.data();
+                        const row = adminParticipantsTableBody.insertRow();
+                        row.classList.add('border-b', 'border-gray-600');
+                        row.innerHTML = `
+                            <td class="py-2 px-4 text-left text-blue-300 font-semibold">${p.instagramHandle}</td>
+                            <td class="py-2 px-4 text-left font-mono">${p.pixKey}</td>
+                            <td class="py-2 px-4 text-left text-sm text-gray-400 break-all">${p.userId.substring(0, 8)}...</td>
+                            <td class="py-2 px-4 text-left text-sm text-gray-400">${new Date(p.timestamp.seconds * 1000).toLocaleString()}</td>
+                        `;
+                    });
+                }
+                adminParticipantsTable.classList.remove('hidden');
+                loadingAdminParticipants.classList.add('hidden');
+            }, (error) => {
+                console.error("Erro ao carregar participantes para admin: ", error);
+                loadingAdminParticipants.textContent = 'Erro ao carregar participantes.';
+                loadingAdminParticipants.classList.add('text-red-400');
+            });
+        }
+
+        /**
+         * Alterna o status de registro (aberto/fechado).
+         */
+        async function toggleRegistrationStatus() {
+            const giveawayStatusRef = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
+            try {
+                const docSnap = await getDoc(giveawayStatusRef);
+                let currentStatus = true; // Assume aberto se não existir
+
+                if (docSnap.exists()) {
+                    currentStatus = docSnap.data().isOpen;
+                }
+                await setDoc(giveawayStatusRef, { isOpen: !currentStatus }, { merge: true });
+                showMessageBox("Status Atualizado", `Inscrições ${!currentStatus ? 'Abertas' : 'Encerradas'} com sucesso!`);
+            } catch (e) {
+                console.error("Erro ao alternar status: ", e);
+                showMessageBox("Erro", "Não foi possível alternar o status das inscrições.");
+            }
+        }
+
+        /**
+         * Seleciona um vencedor aleatório e o registra no Firestore.
+         */
+        async function selectWinner() {
+            const participantsCollectionRef = collection(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`);
+            const giveawayStatusRef = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
+
+            try {
+                const querySnapshot = await getDocs(query(participantsCollectionRef));
+                const participants = [];
+                querySnapshot.forEach((doc) => {
+                    participants.push(doc.data());
+                });
+
+                if (participants.length === 0) {
+                    showMessageBox("Sem Participantes", "Não há participantes para sortear um vencedor.");
+                    return;
+                }
+
+                const winner = participants[Math.floor(Math.random() * participants.length)];
+
+                await setDoc(giveawayStatusRef, {
+                    winnerHandle: winner.instagramHandle,
+                    winnerPixKey: winner.pixKey,
+                    timestampWinnerSelected: new Date(),
+                    isOpen: false // Encerra as inscrições ao sortear
+                }, { merge: true });
+
+                showMessageBox("Vencedor Sorteado!", `O vencedor é: ${winner.instagramHandle}! A chave Pix foi registrada.`);
+            } catch (e) {
+                console.error("Erro ao sortear vencedor: ", e);
+                showMessageBox("Erro", "Não foi possível sortear um vencedor.");
+            }
+        }
+
+        // Autenticação
+        loginButton.addEventListener('click', async () => {
+            const email = adminEmailInput.value;
+            const password = adminPasswordInput.value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessageBox("Login Sucesso", "Bem-vindo, administrador!");
+            } catch (error) {
+                console.error("Erro de login: ", error);
+                showMessageBox("Erro de Login", "Email ou senha incorretos.");
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showMessageBox("Logout Sucesso", "Você foi desconectado.");
+            } catch (error) {
+                console.error("Erro de Logout: ", error);
+                showMessageBox("Erro de Logout", "Não foi possível desconectar.");
+            }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário logado, mostrar painel admin
+                authSection.classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+                loadAdminData(); // Carrega os dados para o admin
+            } else {
+                // Usuário deslogado, mostrar tela de login
+                authSection.classList.remove('hidden');
+                adminPanel.classList.add('hidden');
+            }
+        });
+
+        // Event Listeners para o painel admin
+        toggleRegistrationButton.addEventListener('click', toggleRegistrationStatus);
+        selectWinnerButton.addEventListener('click', selectWinner);
+
+    </script>
+</body>
+</html>
