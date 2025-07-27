@@ -1,376 +1,70 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pixcom - Sorteio Pix Instagram!</title>
-    <base href="/Doce-sabor/"> <!-- ADICIONADO: Para GitHub Pages -->
-    <!-- Tailwind CSS CDN -->
+    <base href="/Doce-sabor/">
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Fundo escuro */
-            color: #e2e8f0; /* Texto claro */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 1rem;
-            box-sizing: border-box;
-        }
-        .container {
-            background-color: #2d3748; /* Fundo escuro ligeiramente mais claro */
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            padding: 2rem;
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-        }
-        .input-field {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            background-color: #4a5568;
-            color: #e2e8f0;
-            border: 1px solid #4a5568;
-            margin-bottom: 1rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: #63b3ed;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-        }
-        .btn-primary {
-            background-color: #4299e1;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: bold;
-            transition: background-color 0.2s, transform 0.2s;
-            cursor: pointer;
-        }
-        .btn-primary:hover {
-            background-color: #3182ce;
-            transform: translateY(-2px);
-        }
-        .message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #2d3748;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-            text-align: center;
-            max-width: 90%;
-            display: none; /* Escondido por padrão */
-        }
-        .message-box button {
-            background-color: #4299e1;
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: bold;
-            transition: background-color 0.2s;
-            margin-top: 1rem;
-        }
-        .message-box button:hover {
-            background-color: #3182ce;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-4xl font-bold mb-4 text-pink-400">Pixcom - Sorteio Pix Instagram!</h1>
-        <p class="text-lg mb-6">Inscreva-se para participar e ganhar um Pix!</p>
 
-        <div id="registrationStatus" class="mb-4 text-xl font-semibold text-center">
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a202c">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+    <div class="container max-w-lg w-full bg-gray-800 rounded-lg p-6 shadow-lg text-center">
+        <h1 class="text-3xl font-bold text-pink-400 mb-4">Pixcom - Sorteio Pix</h1>
+        <p class="mb-6 text-gray-300">Participe com seu Instagram e chave Pix!</p>
+
+        <div id="registrationStatus" class="mb-4 text-lg font-semibold">
             Status: <span id="statusText" class="text-yellow-300">Carregando...</span>
         </div>
 
         <div id="registrationForm">
-            <div class="mb-4 text-left">
-                <label for="instagramHandle" class="block text-gray-300 text-sm font-bold mb-2">Seu @ do Instagram:</label>
-                <input type="text" id="instagramHandle" placeholder="@seuinstagram" class="input-field" required>
-                <p class="text-xs text-gray-400 mt-1">Ex: @meu_perfil_legal</p>
-            </div>
-
-            <div class="mb-6 text-left">
-                <label for="pixKey" class="block text-gray-300 text-sm font-bold mb-2">Sua Chave Pix:</label>
-                <input type="text" id="pixKey" placeholder="CPF, E-mail, Telefone ou Chave Aleatória" class="input-field" required>
-                <p class="text-xs text-gray-400 mt-1">Será usada para o envio do Pix em caso de vitória.</p>
-            </div>
-
-            <button id="registerButton" class="btn-primary w-full">
-                Quero Participar!
-            </button>
+            <input type="text" id="instagramHandle" placeholder="@seuinstagram" class="input-field" required />
+            <input type="text" id="pixKey" placeholder="Sua chave Pix" class="input-field" required />
+            <button id="registerButton" class="btn-primary w-full">Quero Participar!</button>
         </div>
 
         <div id="winnerSection" class="mt-8 hidden">
-            <h2 class="text-3xl font-bold mb-4 text-purple-400">Vencedor!</h2>
-            <p class="text-2xl font-bold text-white"><span id="winnerHandle"></span></p>
-            <p class="text-md text-gray-400 mt-2">Parabéns!</p>
+            <h2 class="text-2xl font-bold text-purple-400">Vencedor:</h2>
+            <p id="winnerHandle" class="text-xl text-white"></p>
         </div>
 
         <div class="mt-8">
-            <h2 class="text-3xl font-bold mb-4 text-green-400">Participantes</h2>
-            <div id="loadingParticipants" class="text-center py-4">Carregando participantes...</div>
-            <ul id="participantsList" class="list-disc list-inside text-left hidden">
-                <!-- Participantes serão carregados aqui -->
-            </ul>
-            <p class="text-sm mt-4 text-gray-400">Seu ID de Usuário: <span id="userIdDisplay" class="font-mono text-gray-300 break-all"></span></p>
+            <h2 class="text-xl font-bold text-green-400 mb-2">Participantes</h2>
+            <div id="loadingParticipants" class="text-center text-sm text-gray-400">Carregando...</div>
+            <ul id="participantsList" class="hidden text-left mt-4 list-disc list-inside"></ul>
+            <p class="text-xs text-gray-500 mt-4">Seu ID: <span id="userIdDisplay" class="font-mono break-all"></span></p>
         </div>
-        
-        <div class="mt-8 text-center">
-            <a href="/admin.html" class="text-blue-400 hover:underline text-sm">Acesso Admin</a>
+
+        <div class="mt-6 text-sm text-blue-400">
+            <a href="admin.html" class="hover:underline">Acesso Admin</a>
         </div>
     </div>
 
-    <!-- Message Box -->
+    <!-- Caixa de mensagem -->
     <div id="messageBox" class="message-box">
         <h3 id="messageTitle" class="text-2xl font-bold mb-4"></h3>
         <p id="messageContent" class="text-lg mb-6"></p>
         <button id="messageButton">Ok</button>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+    <!-- Firebase + lógica (adicione seu JS aqui ou separe em app.js) -->
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
-  authDomain: "doce-sabor-caseiro.firebaseapp.com",
-  projectId: "doce-sabor-caseiro",
-  storageBucket: "doce-sabor-caseiro.firebasestorage.app",
-  messagingSenderId: "414062499771",
-  appId: "1:414062499771:web:1a811377bc6bbf145f969e",
-  measurementId: "G-KMC0FC7Z4H"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-        window.firebaseAuth = auth; // <-- ADICIONADO: Expõe o objeto 'auth' globalmente para acesso via console
-
-        let userId = null; // ID do usuário atual
-        const instagramHandleInput = document.getElementById('instagramHandle');
-        const pixKeyInput = document.getElementById('pixKey');
-        const registerButton = document.getElementById('registerButton');
-        const participantsList = document.getElementById('participantsList');
-        const loadingParticipants = document.getElementById('loadingParticipants');
-        const userIdDisplay = document.getElementById('userIdDisplay');
-        const registrationForm = document.getElementById('registrationForm');
-        const statusText = document.getElementById('statusText');
-        const winnerSection = document.getElementById('winnerSection');
-        const winnerHandle = document.getElementById('winnerHandle');
-
-
-        // Elementos da caixa de mensagem personalizada
-        const messageBox = document.getElementById('messageBox');
-        const messageTitle = document.getElementById('messageTitle');
-        const messageContent = document.getElementById('messageContent');
-        const messageButton = document.getElementById('messageButton');
-
-        /**
-         * Exibe uma caixa de mensagem personalizada.
-         * @param {string} title - O título da mensagem.
-         * @param {string} content - O conteúdo da mensagem.
-         * @param {function} [callback] - Função a ser executada ao fechar a caixa.
-         */
-        function showMessageBox(title, content, callback = null) {
-            messageTitle.textContent = title;
-            messageContent.textContent = content;
-            messageBox.style.display = 'block';
-            messageButton.onclick = () => {
-                messageBox.style.display = 'none';
-                if (callback) {
-                    callback();
-                }
-            };
+    <!-- PWA: Registro do Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(() => console.log('✅ Service Worker registrado com sucesso'))
+                .catch(error => console.error('❌ Erro ao registrar Service Worker:', error));
         }
-
-        /**
-         * Autentica o usuário no Firebase anonimamente.
-         */
-        async function authenticateUser() {
-            try {
-                await signInAnonymously(auth);
-                userId = auth.currentUser?.uid || crypto.randomUUID();
-                userIdDisplay.textContent = userId;
-                console.log('Usuário autenticado:', userId);
-            } catch (error) {
-                console.error("Erro na autenticação Firebase:", error);
-                showMessageBox("Erro de Autenticação", "Não foi possível autenticar. Tente novamente mais tarde.");
-                userId = crypto.randomUUID();
-                userIdDisplay.textContent = userId;
-            }
-        }
-
-        /**
-         * Registra o participante no Firestore.
-         */
-        async function registerParticipant() {
-            if (!userId) {
-                showMessageBox("Erro", "Usuário não autenticado. Tente novamente.");
-                return;
-            }
-
-            const instagramHandle = instagramHandleInput.value.trim();
-            const pixKey = pixKeyInput.value.trim();
-
-            if (!instagramHandle || !pixKey) {
-                showMessageBox("Campos Vazios", "Por favor, preencha seu @ do Instagram e sua Chave Pix.");
-                return;
-            }
-
-            if (!instagramHandle.startsWith('@')) {
-                showMessageBox("Formato Inválido", "O @ do Instagram deve começar com '@'.");
-                return;
-            }
-
-            registerButton.disabled = true;
-            registerButton.textContent = 'Registrando...';
-
-            try {
-                // Caminho para dados públicos: /artifacts/{projectId}/public/data/giveaway_participants
-                const participantDocRef = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`, userId);
-                await setDoc(participantDocRef, {
-                    userId: userId,
-                    instagramHandle: instagramHandle,
-                    pixKey: pixKey,
-                    timestamp: new Date(),
-                });
-                showMessageBox("Sucesso!", "Você foi registrado no sorteio! Boa sorte!");
-                instagramHandleInput.value = ''; // Limpa o campo
-                pixKeyInput.value = ''; // Limpa o campo
-            } catch (e) {
-                console.error("Erro ao registrar participante: ", e);
-                showMessageBox("Erro", "Não foi possível registrar sua participação. Tente novamente.");
-            } finally {
-                registerButton.disabled = false;
-                registerButton.textContent = 'Quero Participar!';
-            }
-        }
-
-        /**
-         * Carrega e exibe a lista de participantes do Firestore em tempo real.
-         */
-        async function loadParticipants() {
-            loadingParticipants.classList.remove('hidden');
-            participantsList.classList.add('hidden');
-            participantsList.innerHTML = ''; // Limpa a lista existente
-
-            try {
-                // Listener para o status do sorteio (aberto/fechado/vencedor)
-                const giveawayStatusRef = doc(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_status`, 'current');
-                onSnapshot(giveawayStatusRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const statusData = docSnap.data();
-                        if (statusData.isOpen) {
-                            statusText.textContent = 'Inscrições Abertas!';
-                            statusText.classList.remove('text-red-400', 'text-purple-400');
-                            statusText.classList.add('text-green-400');
-                            registrationForm.classList.remove('hidden');
-                        } else {
-                            statusText.textContent = 'Inscrições Encerradas!';
-                            statusText.classList.remove('text-green-400', 'text-purple-400');
-                            statusText.classList.add('text-red-400');
-                            registrationForm.classList.add('hidden'); // Esconde o formulário
-                        }
-                        if (statusData.winnerHandle) {
-                            winnerHandle.textContent = statusData.winnerHandle;
-                            winnerSection.classList.remove('hidden');
-                            statusText.textContent = 'Sorteio Realizado!';
-                            statusText.classList.remove('text-green-400', 'text-red-400');
-                            statusText.classList.add('text-purple-400');
-                        } else {
-                            winnerSection.classList.add('hidden');
-                        }
-                    } else {
-                        // Se o documento de status não existir, assume aberto por padrão
-                        setDoc(giveawayStatusRef, { isOpen: true, winnerHandle: null, winnerPixKey: null }); // Inicializa o status
-                        statusText.textContent = 'Inscrições Abertas!';
-                        statusText.classList.remove('text-red-400', 'text-purple-400');
-                        statusText.classList.add('text-green-400');
-                        registrationForm.classList.remove('hidden');
-                        winnerSection.classList.add('hidden');
-                    }
-                }, (error) => {
-                    console.error("Erro ao carregar status do sorteio: ", error);
-                    statusText.textContent = 'Erro ao carregar status.';
-                    statusText.classList.remove('text-green-400', 'text-purple-400');
-                    statusText.classList.add('text-red-400');
-                });
-
-
-                // Listener para a lista de participantes
-                const participantsCollectionRef = collection(db, `artifacts/${firebaseConfig.projectId}/public/data/giveaway_participants`);
-                const q = query(participantsCollectionRef);
-
-                onSnapshot(q, (querySnapshot) => {
-                    let participants = [];
-                    querySnapshot.forEach((doc) => {
-                        participants.push(doc.data());
-                    });
-
-                    if (participants.length === 0) {
-                        participantsList.innerHTML = '<li class="text-center text-gray-400">Nenhum participante ainda. Seja o primeiro!</li>';
-                    } else {
-                        participantsList.innerHTML = ''; // Limpa antes de adicionar
-                        participants.forEach((p) => {
-                            const listItem = document.createElement('li');
-                            listItem.classList.add('py-2', 'border-b', 'border-gray-700', 'flex', 'justify-between', 'items-center');
-                            // Exibe o handle do Instagram e uma parte da chave Pix (para privacidade)
-                            const displayPixKey = p.pixKey.substring(0, 4) + '...'; // Exibe apenas os 4 primeiros caracteres
-                            listItem.innerHTML = `
-                                <span class="text-blue-300 font-semibold">${p.instagramHandle}</span>
-                                <span class="text-gray-400 text-sm">Pix: ${displayPixKey}</span>
-                            `;
-                            participantsList.appendChild(listItem);
-                        });
-                    }
-                    participantsList.classList.remove('hidden');
-                    loadingParticipants.classList.add('hidden');
-                }, (error) => {
-                    console.error("Erro ao carregar participantes: ", error);
-                    participantsList.innerHTML = '<li class="text-center text-red-400">Erro ao carregar participantes.</li>';
-                    participantsList.classList.remove('hidden');
-                    loadingParticipants.classList.add('hidden');
-                });
-
-            } catch (e) {
-                console.error("Erro ao configurar listener de participantes: ", e);
-                participantsList.innerHTML = '<li class="text-center text-red-400">Erro ao carregar participantes.</li>';
-                participantsList.classList.remove('hidden');
-                loadingParticipants.classList.add('hidden');
-            }
-        }
-
-        // Event Listeners
-        registerButton.addEventListener('click', registerParticipant);
-
-        // Inicializa a autenticação e carrega a lista de participantes ao carregar a página
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                userIdDisplay.textContent = userId;
-                await loadParticipants();
-            } else {
-                await authenticateUser();
-            }
-        });
     </script>
 </body>
 </html>
