@@ -38,7 +38,7 @@
     <p class="mb-4 font-semibold">Status: <span class="text-yellow-400" id="statusText">Inscrições Abertas</span></p>
     <input type="text" id="instagramHandle" class="input-field" placeholder="@seuinstagram">
     <input type="text" id="pixKey" class="input-field" placeholder="Chave Pix">
-    <button id="registerButton" class="btn">Quero Participar!</button>
+    <button id="registerButton" class="btn" disabled>Quero Participar!</button>
     <h2 class="text-xl mt-6 mb-2 font-bold text-green-400">Participantes</h2>
     <ul id="participantsList" class="mb-2 hidden"></ul>
     <p id="loadingParticipants">Carregando participantes...</p>
@@ -100,13 +100,15 @@
   const mainView = document.getElementById("mainView");
   const loginView = document.getElementById("loginView");
   const adminPanel = document.getElementById("adminPanel");
+  const registerButton = document.getElementById("registerButton");
+  let currentUID = null;
 
   const showView = (view) => {
     [mainView, loginView, adminPanel].forEach(v => v.classList.add("hidden"));
     view.classList.remove("hidden");
   };
 
-  let currentUID = null;
+  registerButton.disabled = true;
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
@@ -115,11 +117,12 @@
       const isAdmin = user.providerData[0]?.providerId === "password";
       showView(isAdmin ? adminPanel : mainView);
       if (isAdmin) carregarParticipantesAdmin();
+      registerButton.disabled = false;
     } else {
       try {
         await signInAnonymously(auth);
       } catch (e) {
-        alert("Erro ao autenticar anonimamente: " + e.message);
+        alert("Erro ao autenticar: " + e.message);
       }
     }
   });
@@ -141,10 +144,11 @@
 
   document.getElementById("logoutButton").onclick = () => signOut(auth);
 
-  document.getElementById("registerButton").onclick = async () => {
+  registerButton.onclick = async () => {
     const instagram = document.getElementById("instagramHandle").value.trim();
     const chavePix = document.getElementById("pixKey").value.trim();
     if (!instagram || !chavePix) return alert("Preencha todos os campos!");
+    if (!currentUID) return alert("Aguarde a autenticação...");
     try {
       await setDoc(doc(db, "participantes", currentUID), {
         instagram, chavePix, data: new Date().toISOString()
