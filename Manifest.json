@@ -1,0 +1,21 @@
+{
+  "name": "Pixcom - Sorteio Pix Instagram",
+  "short_name": "Pixcom",
+  "description": "Participe de sorteios de Pix diretamente pelo Instagram.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#1a202c",
+  "theme_color": "#1a202c",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
