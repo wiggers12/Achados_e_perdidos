@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pixcom - Sorteio Pix</title>
   <meta name="theme-color" content="#111827" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .input-field {
@@ -76,10 +78,10 @@
   </div>
 </section>
 
-<!-- FIREBASE E APP -->
+<!-- FIREBASE -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
   import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -91,8 +93,6 @@
     appId: "1:414062499771:web:1a811377bc6bbf145f969e"
   };
 
-  const ADMIN_UID = "mv0x6ktWwfZHsIKotKnmrW9RQsY2"; // UID do admin
-
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -101,10 +101,28 @@
   const loginView = document.getElementById("loginView");
   const adminPanel = document.getElementById("adminPanel");
 
-  const showView = (v) => {
-    [mainView, loginView, adminPanel].forEach(el => el.classList.add("hidden"));
-    v.classList.remove("hidden");
+  const showView = (view) => {
+    [mainView, loginView, adminPanel].forEach(v => v.classList.add("hidden"));
+    view.classList.remove("hidden");
   };
+
+  let currentUID = null;
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      currentUID = user.uid;
+      document.getElementById("userIdDisplay").textContent = currentUID;
+      const isAdmin = user.providerData[0]?.providerId === "password";
+      showView(isAdmin ? adminPanel : mainView);
+      if (isAdmin) carregarParticipantesAdmin();
+    } else {
+      try {
+        await signInAnonymously(auth);
+      } catch (e) {
+        alert("Erro ao autenticar anonimamente: " + e.message);
+      }
+    }
+  });
 
   document.getElementById("adminLink").addEventListener("click", (e) => {
     e.preventDefault();
@@ -123,35 +141,13 @@
 
   document.getElementById("logoutButton").onclick = () => signOut(auth);
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      if (user.uid === ADMIN_UID) {
-        showView(adminPanel);
-        carregarParticipantesAdmin();
-      } else {
-        alert("Acesso negado. Você não é administrador.");
-        signOut(auth);
-      }
-    } else {
-      showView(mainView);
-    }
-  });
-
-  // ID único persistente
-  const savedId = localStorage.getItem("userId") || Math.random().toString(36).substr(2, 9);
-  localStorage.setItem("userId", savedId);
-  document.getElementById("userIdDisplay").textContent = savedId;
-
   document.getElementById("registerButton").onclick = async () => {
     const instagram = document.getElementById("instagramHandle").value.trim();
     const chavePix = document.getElementById("pixKey").value.trim();
     if (!instagram || !chavePix) return alert("Preencha todos os campos!");
-
     try {
-      await setDoc(doc(db, "participantes", savedId), {
-        instagram,
-        chavePix,
-        data: new Date().toISOString()
+      await setDoc(doc(db, "participantes", currentUID), {
+        instagram, chavePix, data: new Date().toISOString()
       });
       alert("Inscrição confirmada!");
     } catch (e) {
@@ -185,7 +181,6 @@
   };
 
   document.getElementById("toggleStatusBtn").onclick = carregarParticipantesAdmin;
-
   carregarParticipantes();
 </script>
 
