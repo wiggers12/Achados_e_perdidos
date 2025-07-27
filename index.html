@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pixcom - Sorteio Pix</title>
   <meta name="theme-color" content="#111827" />
-  <link rel="icon" href="icons/icon-192.png" />
-  <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .input-field {
@@ -35,7 +33,7 @@
   <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow mt-10 text-center">
     <h1 class="text-2xl font-bold text-pink-400 mb-4">Pixcom - Sorteio Pix Instagram!</h1>
     <p class="text-gray-300 mb-4">Inscreva-se para participar e ganhar um Pix!</p>
-    <p class="mb-4 font-semibold">Status: <span class="text-yellow-400" id="statusText">Carregando...</span></p>
+    <p class="mb-4 font-semibold">Status: <span class="text-yellow-400" id="statusText">Inscrições Abertas</span></p>
     <input type="text" id="instagramHandle" class="input-field" placeholder="@seuinstagram">
     <input type="text" id="pixKey" class="input-field" placeholder="Chave Pix">
     <button id="registerButton" class="btn">Quero Participar!</button>
@@ -62,7 +60,7 @@
   <div class="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow mt-10">
     <h2 class="text-2xl font-bold text-yellow-300 mb-4 text-center">Painel de Administração</h2>
     <div class="flex justify-between items-center mb-4">
-      <button id="toggleStatusBtn" class="btn w-1/2 mr-2">Carregar Status</button>
+      <button id="toggleStatusBtn" class="btn w-1/2 mr-2">Recarregar Lista</button>
       <button id="logoutButton" class="bg-red-600 text-white px-4 py-2 rounded w-1/2 ml-2">Sair</button>
     </div>
     <h3 class="text-lg font-bold text-green-300 mt-6 mb-2">Todos os Participantes</h3>
@@ -82,15 +80,15 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
   import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyDp5pdc9ksD1WeUNXLSWvuvII9TPp6ywwk",
-    authDomain: "globalaquecedores-39313.firebaseapp.com",
-    projectId: "globalaquecedores-39313",
-    storageBucket: "globalaquecedores-39313.appspot.com",
-    messagingSenderId: "787901667516",
-    appId: "1:787901667516:web:5a9c405fa03734900699c6"
+    apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
+    authDomain: "doce-sabor-caseiro.firebaseapp.com",
+    projectId: "doce-sabor-caseiro",
+    storageBucket: "doce-sabor-caseiro.appspot.com",
+    messagingSenderId: "414062499771",
+    appId: "1:414062499771:web:1a811377bc6bbf145f969e"
   };
 
   const app = initializeApp(firebaseConfig);
@@ -169,6 +167,8 @@
       tbody.innerHTML += `<tr><td>${d.instagram}</td><td>${d.chavePix}</td></tr>`;
     });
   };
+
+  document.getElementById("toggleStatusBtn").onclick = carregarParticipantesAdmin;
 
   carregarParticipantes();
 </script>
