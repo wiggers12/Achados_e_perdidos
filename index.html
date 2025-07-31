@@ -2,208 +2,179 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AviatorBR</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background-color: #0a0a0a;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    header {
-      width: 100%;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #121212;
-      padding: 10px;
-      text-align: center;
-      font-size: 24px;
-      color: #ff0033;
-    }
-
-    .multiplier {
-      font-size: 64px;
-      font-weight: bold;
-      margin: 20px 0;
-      color: #ff0033;
-    }
-
-    .screen {
-      background: radial-gradient(circle at center, #1e1e1e, #0a0a0a);
-      width: 90%;
-      max-width: 500px;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
-      position: relative;
-      height: 200px;
-      overflow: hidden;
-    }
-
-    .plane {
-      width: 80px;
-      position: absolute;
-      top: 60%;
-      left: 0;
-      transition: transform 0.2s linear;
-    }
-
-    .saldo-container {
-      margin: 10px 0;
-      font-size: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .btn-depositar {
-      background: #ddd;
-      border: none;
-      border-radius: 10px;
-      padding: 5px 10px;
-      font-weight: bold;
-    }
-
-    .bets {
+      color: #fff;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .title {
+      font-size: 2.5em;
       margin-top: 20px;
-      width: 90%;
-      max-width: 500px;
+      color: #f00;
+      font-family: 'Orbitron', sans-serif;
     }
-
-    .bet-box {
-      background-color: #111;
-      padding: 15px;
+    .multiplier {
+      font-size: 4em;
+      margin: 10px;
+      color: #f00;
+      font-weight: bold;
+    }
+    .saldo {
+      font-size: 1.2em;
+      margin: 5px;
+    }
+    .depositar {
+      background-color: #ccc;
+      color: #000;
+      padding: 5px 10px;
       border-radius: 10px;
-    }
-
-    .bet-box h3 {
-      margin: 0;
+      cursor: pointer;
       margin-bottom: 10px;
     }
-
-    .quick-values {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
+    .resultados, .apostas-container {
+      background-color: #222;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
     }
-
-    .quick-values button {
-      background-color: #333;
+    .botao-verde {
+      background-color: #00cc00;
       color: white;
+      border: none;
+      padding: 10px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+    .valores-rapidos button {
+      margin: 5px;
+      padding: 5px 10px;
+      background: #444;
+      color: #fff;
       border: none;
       border-radius: 5px;
-      padding: 5px 10px;
       cursor: pointer;
     }
-
-    .bet-input {
-      width: 100%;
-      margin-bottom: 10px;
+    .aposta-bloco {
+      margin-top: 10px;
+    }
+    .input-aposta {
+      width: calc(100% - 10px);
       padding: 10px;
+      font-size: 1.2em;
+      margin-bottom: 10px;
       border-radius: 5px;
       border: none;
-      font-size: 16px;
     }
-
-    .btn-apostar {
-      background-color: #00cc33;
-      color: white;
-      font-weight: bold;
-      padding: 10px;
-      width: 100%;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
+    .aviator-img {
+      width: 100px;
+      height: auto;
+      animation: voar 3s infinite linear;
     }
-
-    @media (max-width: 600px) {
-      .multiplier {
-        font-size: 48px;
-      }
-      .plane {
-        width: 60px;
-      }
+    @keyframes voar {
+      from { transform: translateY(0); }
+      to { transform: translateY(-20px); }
     }
   </style>
 </head>
 <body>
-  <header>AviatorBR</header>
-
-  <div class="screen">
-    <div class="multiplier" id="multiplicador">1.00x</div>
-    <img src="https://wiggers12.github.io/aviatorbr-plane.png" class="plane" id="aviao">
+  <div class="title">AviatorBR</div>
+  <div class="multiplier" id="multiplicador">1.00x</div>
+  <img src="https://wiggers12.github.io/assets/aviator-plane.png" class="aviator-img" alt="Avião" />
+  <div class="saldo">Saldo: R$ <span id="saldo">100.00</span></div>
+  <div class="depositar" onclick="depositar()">Depositar</div>
+  <div class="resultados">
+    <strong>Últimos Resultados:</strong>
+    <div id="ultimos"></div>
   </div>
-
-  <div class="saldo-container">
-    Saldo: R$ <span id="saldo">100.00</span>
-    <button class="btn-depositar">Depositar</button>
+  <div class="apostas-container">
+    <div><strong>Aposta 1</strong></div>
+    <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto1" type="number" placeholder="Auto cash-out (ex: 2.0)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta1', 10)">10</button>
+      <button onclick="setValor('aposta1', 20)">20</button>
+      <button onclick="setValor('aposta1', 50)">50</button>
+      <button onclick="setValor('aposta1', 100)">100</button>
+    </div>
+    <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
   </div>
-
-  <div class="bets">
-    <div class="bet-box">
-      <h3>Aposta 1</h3>
-      <div class="quick-values">
-        <button onclick="setBet('aposta1', 10)">10</button>
-        <button onclick="setBet('aposta1', 20)">20</button>
-        <button onclick="setBet('aposta1', 50)">50</button>
-        <button onclick="setBet('aposta1', 100)">100</button>
-      </div>
-      <input id="aposta1" class="bet-input" type="number" placeholder="Digite o valor">
-      <input id="auto1" class="bet-input" type="number" placeholder="Auto cash-out (ex: 2.0)">
-      <button class="btn-apostar" onclick="apostar(1)">APOSTA</button>
+  <div class="apostas-container">
+    <div><strong>Aposta 2</strong></div>
+    <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.5)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta2', 10)">10</button>
+      <button onclick="setValor('aposta2', 20)">20</button>
+      <button onclick="setValor('aposta2', 50)">50</button>
+      <button onclick="setValor('aposta2', 100)">100</button>
     </div>
-
-    <div class="bet-box">
-      <h3>Aposta 2</h3>
-      <div class="quick-values">
-        <button onclick="setBet('aposta2', 10)">10</button>
-        <button onclick="setBet('aposta2', 20)">20</button>
-        <button onclick="setBet('aposta2', 50)">50</button>
-        <button onclick="setBet('aposta2', 100)">100</button>
-      </div>
-      <input id="aposta2" class="bet-input" type="number" placeholder="Digite o valor">
-      <input id="auto2" class="bet-input" type="number" placeholder="Auto cash-out (ex: 3.5)">
-      <button class="btn-apostar" onclick="apostar(2)">APOSTA</button>
-    </div>
+    <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
   </div>
 
   <script>
+    let saldo = 100.00;
     let multiplicador = 1.00;
-    let saldo = 100;
-    let aviao = document.getElementById("aviao");
-    let intervalo;
+    let rodando = false;
+    let interval;
 
-    function startGame() {
+    function atualizarMultiplicador() {
+      if (!rodando) return;
+      multiplicador += 0.05;
+      document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
+    }
+
+    function iniciarRodada() {
       multiplicador = 1.00;
-      intervalo = setInterval(() => {
-        multiplicador = (parseFloat(multiplicador) + 0.01).toFixed(2);
-        document.getElementById("multiplicador").innerText = multiplicador + "x";
-        aviao.style.transform = `translateX(${multiplicador * 50}px) translateY(-${multiplicador * 5}px)`;
-      }, 100);
+      rodando = true;
+      document.getElementById('multiplicador').innerText = '1.00x';
+      interval = setInterval(atualizarMultiplicador, 200);
     }
 
-    function setBet(id, valor) {
-      document.getElementById(id).value = valor;
-    }
-
-    function apostar(numero) {
-      let valor = parseFloat(document.getElementById(`aposta${numero}`).value);
-      if (valor > saldo) return alert("Saldo insuficiente");
+    function apostar(num) {
+      const valor = parseFloat(document.getElementById(`aposta${num}`).value);
+      if (valor > saldo || isNaN(valor) || valor <= 0) {
+        alert('Aposta inválida');
+        return;
+      }
       saldo -= valor;
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
-      // adicionar mais lógica aqui...
+      document.getElementById('saldo').innerText = saldo.toFixed(2);
+      iniciarRodada();
+      const botao = document.getElementById(`botao${num}`);
+      botao.innerText = 'Encerrar Aposta';
+      botao.onclick = function () { encerrarAposta(num, valor); };
     }
 
-    startGame();
+    function encerrarAposta(num, valor) {
+      clearInterval(interval);
+      rodando = false;
+      const ganho = valor * multiplicador;
+      saldo += ganho;
+      document.getElementById('saldo').innerText = saldo.toFixed(2);
+      document.getElementById(`botao${num}`).innerText = 'Apostar';
+      document.getElementById(`botao${num}`).onclick = function () { apostar(num); };
+      multiplicador = 1.00;
+    }
+
+    function setValor(inputId, valor) {
+      document.getElementById(inputId).value = valor;
+    }
+
+    function depositar() {
+      saldo += 50;
+      document.getElementById('saldo').innerText = saldo.toFixed(2);
+    }
   </script>
 </body>
 </html>
