@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: #000;
+      background: linear-gradient(135deg, #141e30, #243b55);
       color: #fff;
     }
     .login-screen {
@@ -47,7 +47,7 @@
     }
     .left-panel {
       flex: 1;
-      background: #111;
+      background: rgba(0,0,0,0.7);
       position: relative;
     }
     .right-panel {
@@ -68,7 +68,7 @@
     }
     .plane {
       position: absolute;
-      width: 50px;
+      width: 60px;
       top: 60%;
       left: 10%;
       transition: transform 0.2s linear;
@@ -101,6 +101,11 @@
       font-size: 18px;
       margin-top: 10px;
     }
+    #btn-parar {
+      margin: 10px auto;
+      display: none;
+      background-color: orange !important;
+    }
     @media (max-width: 768px) {
       .container {
         flex-direction: column;
@@ -129,8 +134,9 @@
     <div class="left-panel">
       <h1>AviatorBR</h1>
       <div class="multiplier" id="multiplicador">1.00x</div>
-      <img src="https://cdn-icons-png.flaticon.com/512/67/67347.png" class="plane" id="plane">
+      <img src="https://cdn.pixabay.com/photo/2013/07/12/15/28/airplane-150798_1280.png" class="plane" id="plane">
       <div id="saldo">Saldo: R$ <span id="saldo-valor">100.00</span> <button onclick="depositar()">Depositar</button></div>
+      <button id="btn-parar" onclick="parar()">Parar Agora</button>
       <div class="stats" id="stats"><strong>Últimos Resultados:</strong><br></div>
     </div>
     <div class="right-panel">
@@ -160,6 +166,7 @@
     const mult = document.getElementById('multiplicador');
     const stats = document.getElementById('stats');
     const chat = document.getElementById('chat');
+    const pararBtn = document.getElementById('btn-parar');
     const apostas = {
       1: { ativa: false, valor: 0, auto: 0 },
       2: { ativa: false, valor: 0, auto: 0 }
@@ -179,7 +186,7 @@
     }
 
     window.depositar = () => {
-      alert('Chave Pix: exemplo@pix.com.br\\nConfirme o pagamento via WhatsApp.');
+      alert('Chave Pix: exemplo@pix.com.br\nConfirme o pagamento via WhatsApp.');
     }
 
     window.apostar = (id) => {
@@ -200,11 +207,25 @@
       if (!running) iniciarJogo();
     }
 
+    window.parar = () => {
+      for (let id in apostas) {
+        if (apostas[id].ativa) {
+          let ganho = apostas[id].valor * current;
+          saldo += ganho;
+          atualizarSaldo();
+          chat.innerHTML += `<div class='chat-msg'>🛑 Aposta ${id} retirada manual: R$${ganho.toFixed(2)}</div>`;
+          apostas[id].ativa = false;
+        }
+      }
+      pararBtn.style.display = 'none';
+    }
+
     function iniciarJogo() {
       running = true;
       current = 1.00;
       let crashPoint = parseFloat((Math.random() * 5 + 1).toFixed(2));
       let posX = 10, posY = 60;
+      pararBtn.style.display = 'block';
       interval = setInterval(() => {
         current = parseFloat((current + 0.05).toFixed(2));
         mult.innerText = current.toFixed(2) + 'x';
@@ -232,6 +253,7 @@
           plane.style.top = '60%';
           apostas[1].ativa = false;
           apostas[2].ativa = false;
+          pararBtn.style.display = 'none';
         }
       }, 150);
     }
