@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AviatorBR</title>
   <style>
     body {
@@ -12,77 +12,68 @@
       color: #fff;
       overflow-x: hidden;
     }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+    }
     .title {
-      text-align: center;
-      font-size: 2.5em;
-      margin: 20px 0;
+      font-size: 2em;
       color: #f00;
       font-family: 'Orbitron', sans-serif;
     }
-    .saldo-topo {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      background-color: #1e1e1e;
-      padding: 10px 15px;
-      border-radius: 20px;
+    .saldo-icone {
+      background-color: #333;
+      padding: 8px 15px;
+      border-radius: 15px;
+      font-weight: bold;
       font-size: 1em;
-      box-shadow: 0 0 10px #000;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .saldo-topo img {
-      width: 20px;
-      height: 20px;
     }
     .game-area {
       position: relative;
-      background: #1d1d1d;
-      width: 100%;
-      height: 200px;
-      overflow: hidden;
+      height: 250px;
       border: 2px solid #333;
-      margin-bottom: 20px;
+      margin: 10px auto;
+      max-width: 1000px;
+      background: radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%);
+      overflow: hidden;
     }
     .aviator-img {
       position: absolute;
-      top: 50%;
+      top: 100px;
       left: 0;
-      transform: translateY(-50%);
       width: 100px;
-      height: auto;
+      transition: transform 0.2s linear;
+      z-index: 2;
     }
     .trail {
       position: absolute;
-      width: 4px;
-      height: 4px;
+      width: 10px;
+      height: 2px;
       background: red;
-      border-radius: 50%;
-      z-index: 0;
+      top: 150px;
+      z-index: 1;
     }
     .multiplier {
       text-align: center;
-      font-size: 3.5em;
+      font-size: 3em;
+      margin: 10px 0;
       color: #f00;
       font-weight: bold;
     }
-    .depositar, .sacar {
-      background-color: #0f0;
+    .botoes {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .botoes div {
+      background-color: #ccc;
       color: #000;
-      padding: 10px 15px;
-      margin: 10px;
+      padding: 8px 15px;
       border-radius: 10px;
       cursor: pointer;
-      font-weight: bold;
-      text-align: center;
-      width: fit-content;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .sacar {
-      background-color: #f00;
-      color: #fff;
     }
     .apostas-container {
       background-color: #222;
@@ -119,56 +110,26 @@
       border-radius: 5px;
       border: none;
     }
-    .modal {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.7);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    .modal-content {
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      color: white;
-      text-align: center;
-    }
-    .modal input {
-      padding: 10px;
-      width: 100%;
-      margin: 10px 0;
-      font-size: 1.2em;
-    }
-    .modal button {
-      padding: 10px 20px;
-      background: #0f0;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
-  <div class="saldo-topo">
-    <img src="https://cdn-icons-png.flaticon.com/512/484/484167.png" alt="saldo">
-    R$ <span id="saldo">100.00</span>
+
+  <div class="header">
+    <div class="title">AviatorBR</div>
+    <div class="saldo-icone">Saldo: R$ <span id="saldo">100.00</span></div>
   </div>
 
-  <div class="title">AviatorBR</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
-
   <div class="game-area" id="gameArea">
     <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" class="aviator-img" />
   </div>
 
-  <div class="depositar" onclick="depositar()">Depositar</div>
-  <div class="sacar" onclick="abrirSaque()">Sacar</div>
+  <div class="botoes">
+    <div onclick="depositar()">Depositar</div>
+    <div onclick="sacar()">Sacar</div>
+  </div>
 
+  <!-- Bloco de Apostas 1 -->
   <div class="apostas-container">
     <strong>Aposta 1</strong>
     <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
@@ -182,6 +143,7 @@
     <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
   </div>
 
+  <!-- Bloco de Apostas 2 -->
   <div class="apostas-container">
     <strong>Aposta 2</strong>
     <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
@@ -195,36 +157,43 @@
     <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
   </div>
 
-  <!-- Modal Saque -->
-  <div id="modalSaque" class="modal">
-    <div class="modal-content">
-      <h3>Saque</h3>
-      <input id="valorSaque" type="number" placeholder="Valor a sacar (R$)">
-      <button onclick="confirmarSaque()">Confirmar Saque</button>
-      <div id="erroSaque" style="color: red; margin-top: 10px;"></div>
-    </div>
-  </div>
-
   <script>
     let saldo = 100.00;
     let multiplicador = 1.00;
     let rodando = false;
-    let interval;
-    let aviao = document.getElementById('aviao');
+    let intervalo;
     let posicao = 0;
-    let gameArea = document.getElementById('gameArea');
+    let apostaAtiva = [null, null];
+    let autoCash = [null, null];
+
+    const aviao = document.getElementById("aviao");
+    const gameArea = document.getElementById("gameArea");
 
     function atualizarMultiplicador() {
       if (!rodando) return;
       multiplicador += 0.05;
       document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
-      posicao += 4;
-      aviao.style.left = posicao + 'px';
-      let trail = document.createElement("div");
+      posicao += 5;
+      aviao.style.transform = `translateX(${posicao}px)`;
+
+      const trail = document.createElement("div");
       trail.className = "trail";
-      trail.style.left = posicao + 40 + "px";
-      trail.style.top = "50%";
+      trail.style.left = aviao.offsetLeft + "px";
       gameArea.appendChild(trail);
+
+      // Verificar auto cash-out
+      [1, 2].forEach(num => {
+        if (apostaAtiva[num - 1]) {
+          const cash = autoCash[num - 1];
+          if (cash && multiplicador >= cash) {
+            encerrarAposta(num, apostaAtiva[num - 1], true);
+          }
+        }
+      });
+
+      if (multiplicador > Math.random() * 3 + 2.5) {
+        encerrarRodada();
+      }
     }
 
     function iniciarRodada() {
@@ -234,32 +203,35 @@
       document.querySelectorAll(".trail").forEach(t => t.remove());
       rodando = true;
       document.getElementById('multiplicador').innerText = '1.00x';
-      interval = setInterval(() => {
-        atualizarMultiplicador();
-        if (multiplicador > Math.random() * 3 + 2.5) {
-          encerrarRodada();
-        }
-      }, 150);
+      intervalo = setInterval(atualizarMultiplicador, 150);
     }
 
     function encerrarRodada() {
-      clearInterval(interval);
+      clearInterval(intervalo);
       rodando = false;
-      aviao.style.transition = "transform 1s ease-out";
-      aviao.style.transform = "translateX(200vw)";
-      setTimeout(() => {
-        aviao.style.transition = "none";
-        aviao.style.transform = "translateX(0)";
-        document.querySelectorAll(".trail").forEach(t => t.remove());
-      }, 2000);
+      aviao.style.transform = `translateX(100vw)`;
+      apostaAtiva.forEach((valor, index) => {
+        if (valor) {
+          alert(`Você perdeu a Aposta ${index + 1}.`);
+          document.getElementById(`botao${index + 1}`).innerText = 'Apostar';
+          document.getElementById(`botao${index + 1}`).onclick = function () { apostar(index + 1); };
+          apostaAtiva[index] = null;
+          autoCash[index] = null;
+        }
+      });
     }
 
     function apostar(num) {
       const valor = parseFloat(document.getElementById(`aposta${num}`).value);
+      const auto = parseFloat(document.getElementById(`auto${num}`).value);
       if (valor > saldo || isNaN(valor) || valor <= 0) {
         alert('Aposta inválida');
         return;
       }
+
+      apostaAtiva[num - 1] = valor;
+      autoCash[num - 1] = isNaN(auto) ? null : auto;
+
       saldo -= valor;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
       iniciarRodada();
@@ -268,20 +240,20 @@
       botao.onclick = function () { encerrarAposta(num, valor); };
     }
 
-    function encerrarAposta(num, valor) {
-      clearInterval(interval);
-      rodando = false;
+    function encerrarAposta(num, valor, auto = false) {
+      if (!rodando || !apostaAtiva[num - 1]) return;
       const ganho = valor * multiplicador;
       saldo += ganho;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
-      alert(`Você ganhou R$ ${ganho.toFixed(2)}!`);
+      alert(`Você ${auto ? 'foi pago automaticamente' : 'encerrou a aposta'}!\nGanhou R$ ${ganho.toFixed(2)}.`);
       document.getElementById(`botao${num}`).innerText = 'Apostar';
       document.getElementById(`botao${num}`).onclick = function () { apostar(num); };
-      encerrarRodada();
+      apostaAtiva[num - 1] = null;
+      autoCash[num - 1] = null;
     }
 
-    function setValor(inputId, valor) {
-      document.getElementById(inputId).value = valor;
+    function setValor(id, valor) {
+      document.getElementById(id).value = valor;
     }
 
     function depositar() {
@@ -289,27 +261,8 @@
       document.getElementById('saldo').innerText = saldo.toFixed(2);
     }
 
-    function abrirSaque() {
-      document.getElementById("modalSaque").style.display = "flex";
-      document.getElementById("valorSaque").value = "";
-      document.getElementById("erroSaque").innerText = "";
-    }
-
-    function confirmarSaque() {
-      const valor = parseFloat(document.getElementById("valorSaque").value);
-      const erro = document.getElementById("erroSaque");
-      if (isNaN(valor) || valor <= 0) {
-        erro.innerText = "Valor inválido";
-        return;
-      }
-      if (valor > saldo) {
-        erro.innerText = "Saldo insuficiente";
-        return;
-      }
-      saldo -= valor;
-      document.getElementById('saldo').innerText = saldo.toFixed(2);
-      document.getElementById("modalSaque").style.display = "none";
-      alert(`Saque de R$ ${valor.toFixed(2)} realizado com sucesso!`);
+    function sacar() {
+      alert("Solicitação de saque enviada! Em breve você receberá.");
     }
   </script>
 </body>
