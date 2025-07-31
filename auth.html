@@ -1,0 +1,59 @@
+<!-- auth.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Plane.Money</title>
+  <script type="module" src="firebase.js"></script>
+  <style>
+    body {
+      background: #121212;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    input {
+      padding: 10px;
+      margin: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background-color: #00cc00;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Plane.Money</h1>
+  <input type="email" id="email" placeholder="E-mail">
+  <input type="password" id="password" placeholder="Senha">
+  <button onclick="login()">Entrar</button>
+  <button onclick="signup()">Cadastrar</button>
+  <script type="module">
+    import { login, signup } from './firebase.js';
+    window.login = () => {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('password').value;
+      login(email, senha);
+    }
+    window.signup = () => {
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('password').value;
+      signup(email, senha);
+    }
+  </script>
+</body>
+</html>
