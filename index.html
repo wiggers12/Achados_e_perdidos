@@ -41,10 +41,12 @@
       padding: 20px;
       box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
       position: relative;
+      height: 200px;
+      overflow: hidden;
     }
 
     .plane {
-      width: 60px;
+      width: 80px;
       position: absolute;
       top: 60%;
       left: 0;
@@ -128,7 +130,7 @@
         font-size: 48px;
       }
       .plane {
-        width: 40px;
+        width: 60px;
       }
     }
   </style>
@@ -138,7 +140,7 @@
 
   <div class="screen">
     <div class="multiplier" id="multiplicador">1.00x</div>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Airplane_silhouette.png" class="plane" id="aviao">
+    <img src="https://wiggers12.github.io/aviatorbr-plane.png" class="plane" id="aviao">
   </div>
 
   <div class="saldo-container">
@@ -183,7 +185,7 @@
     function startGame() {
       multiplicador = 1.00;
       intervalo = setInterval(() => {
-        multiplicador = (multiplicador + 0.01).toFixed(2);
+        multiplicador = (parseFloat(multiplicador) + 0.01).toFixed(2);
         document.getElementById("multiplicador").innerText = multiplicador + "x";
         aviao.style.transform = `translateX(${multiplicador * 50}px) translateY(-${multiplicador * 5}px)`;
       }, 100);
