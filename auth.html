@@ -1,58 +1,74 @@
-<!-- auth.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Plane.Money</title>
-  <script type="module" src="firebase.js"></script>
   <style>
     body {
-      background: #121212;
+      font-family: Arial, sans-serif;
+      background: #111;
       color: white;
-      font-family: sans-serif;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      margin: 0;
     }
-    input {
+    input, button {
       padding: 10px;
-      margin: 10px;
-      font-size: 1em;
-      border-radius: 5px;
+      margin: 5px;
       border: none;
+      border-radius: 5px;
+      width: 250px;
     }
     button {
-      padding: 10px 20px;
-      margin-top: 10px;
-      background-color: #00cc00;
+      background-color: #00c853;
       color: white;
-      border: none;
-      border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>Plane.Money</h1>
-  <input type="email" id="email" placeholder="E-mail">
-  <input type="password" id="password" placeholder="Senha">
-  <button onclick="login()">Entrar</button>
-  <button onclick="signup()">Cadastrar</button>
-  <script type="module">
-    import { login, signup } from './firebase.js';
-    window.login = () => {
-      const email = document.getElementById('email').value;
-      const senha = document.getElementById('password').value;
-      login(email, senha);
+  <h2>Login no Plane.Money</h2>
+
+  <input type="email" id="email" placeholder="Digite seu e-mail" />
+  <input type="password" id="senha" placeholder="Digite sua senha" />
+  <button onclick="loginUser()">Entrar</button>
+  <button onclick="registerUser()">Cadastrar</button>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="firebase.js"></script>
+  <script>
+    const auth = firebase.auth();
+
+    function loginUser() {
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+
+      auth.signInWithEmailAndPassword(email, senha)
+        .then(() => {
+          window.location.href = "index.html";
+        })
+        .catch(error => {
+          alert("Erro ao fazer login: " + error.message);
+        });
     }
-    window.signup = () => {
-      const email = document.getElementById('email').value;
-      const senha = document.getElementById('password').value;
-      signup(email, senha);
+
+    function registerUser() {
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+
+      auth.createUserWithEmailAndPassword(email, senha)
+        .then(() => {
+          alert("Cadastro realizado com sucesso!");
+          window.location.href = "index.html";
+        })
+        .catch(error => {
+          alert("Erro ao cadastrar: " + error.message);
+        });
     }
   </script>
 </body>
