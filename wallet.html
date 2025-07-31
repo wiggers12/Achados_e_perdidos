@@ -1,38 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Carteira - Plane.Money</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carteira Plane.Money</title>
   <style>
     body {
-      background: #1e1e1e;
-      color: white;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      margin-top: 40px;
       text-align: center;
-      padding: 50px;
+      padding: 0 20px;
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+    .warning {
+      color: #ffcc00;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+    .botoes {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
     }
     button {
-      margin: 10px;
-      padding: 15px;
-      font-size: 16px;
-      border-radius: 10px;
+      padding: 10px 15px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .depositar {
       background-color: #00cc00;
       color: white;
-      border: none;
-      cursor: pointer;
+    }
+    .sacar {
+      background-color: #00cc00;
+      color: white;
+    }
+    .saldo {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Carteira Plane.Money</h1>
-  <p>⚠️ Simulação de saldo, Firebase Firestore não implementado ainda</p>
-
-  <button onclick="depositar()">Depositar R$50</button>
-  <button onclick="sacar()">Sacar R$50</button>
-  <p id="saldoAtual">Saldo: R$100,00</p>
+  <div class="container">
+    <h2>Carteira Plane.Money</h2>
+    <p class="warning">
+      ⚠️ Simulação de saldo, Firebase Firestore não implementado ainda
+    </p>
+    <div class="botoes">
+      <button class="depositar" onclick="depositar()">Depositar R$50</button>
+      <button class="sacar" onclick="sacar()">Sacar R$50</button>
+    </div>
+    <p class="saldo" id="saldo">Saldo: R$100,00</p>
+  </div>
 
   <script>
     let saldo = 100;
+
+    function atualizarSaldo() {
+      document.getElementById("saldo").innerText = `Saldo: R$${saldo.toFixed(2).replace('.', ',')}`;
+    }
 
     function depositar() {
       saldo += 50;
@@ -48,9 +95,7 @@
       }
     }
 
-    function atualizarSaldo() {
-      document.getElementById("saldoAtual").innerText = "Saldo: R$" + saldo.toFixed(2);
-    }
+    atualizarSaldo();
   </script>
 </body>
 </html>
