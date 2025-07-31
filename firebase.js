@@ -1,61 +1,19 @@
 // firebase.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// Importa e inicializa o Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// CONFIGURAÇÃO DO FIREBASE
 const firebaseConfig = {
-  apiKey: "SUA_API_KEY",
-  authDomain: "SEU_DOMINIO.firebaseapp.com",
-  projectId: "SEU_PROJECT_ID",
-  storageBucket: "SEU_PROJECT_ID.appspot.com",
-  messagingSenderId: "SEU_SENDER_ID",
-  appId: "SEU_APP_ID"
+  apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
+  authDomain: "doce-sabor-caseiro.firebaseapp.com",
+  projectId: "doce-sabor-caseiro",
+  storageBucket: "doce-sabor-caseiro.appspot.com",
+  messagingSenderId: "414062499771",
+  appId: "1:414062499771:web:1a811377bc6bbf145f969e",
+  measurementId: "G-KMC0FC7Z4H"
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+const auth = getAuth(app);
 
-// Login
-export async function login(email, senha) {
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, senha);
-    return cred.user;
-  } catch (error) {
-    throw error;
-  }
-}
-
-// Cadastro
-export async function cadastrar(email, senha) {
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, senha);
-    await setDoc(doc(db, "usuarios", cred.user.uid), {
-      saldo: 100.00
-    });
-    return cred.user;
-  } catch (error) {
-    throw error;
-  }
-}
-
-// Ver saldo
-export async function buscarSaldo(uid) {
-  const ref = doc(db, "usuarios", uid);
-  const snap = await getDoc(ref);
-  return snap.exists() ? snap.data().saldo : 0;
-}
-
-// Atualizar saldo
-export async function atualizarSaldo(uid, novoSaldo) {
-  const ref = doc(db, "usuarios", uid);
-  await updateDoc(ref, { saldo: novoSaldo });
-}
-
-// Logout
-export async function sair() {
-  await signOut(auth);
-}
+// Exporta para usar nos outros arquivos
+export { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword };
