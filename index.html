@@ -2,191 +2,240 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pixcom - Sorteio Pix</title>
-  <meta name="theme-color" content="#111827" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" href="icons/icon-192.png" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AviatorBR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
-    .input-field {
-      background: #1f2937;
-      color: white;
-      padding: 10px;
-      width: 100%;
-      margin-bottom: 10px;
-      border: 1px solid #374151;
-      border-radius: 4px;
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: #000;
+      color: #fff;
     }
-    .btn {
-      background: #3b82f6;
-      color: white;
+    .login-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-screen input, .login-screen button {
       padding: 10px;
+      margin: 8px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
       width: 100%;
-      border-radius: 4px;
+      max-width: 300px;
+    }
+    .login-screen button {
+      background: red;
+      color: white;
       font-weight: bold;
+      cursor: pointer;
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+    .left-panel, .right-panel {
+      padding: 20px;
+    }
+    .left-panel {
+      flex: 1;
+      background: #111;
+      position: relative;
+    }
+    .right-panel {
+      width: 400px;
+      background: #1a1a1a;
+      display: flex;
+      flex-direction: column;
+    }
+    h1 {
+      color: red;
+      text-align: center;
+    }
+    .multiplier {
+      font-size: 48px;
+      text-align: center;
+      margin-top: 10px;
+      color: #f00;
+    }
+    .plane {
+      position: absolute;
+      width: 50px;
+      top: 60%;
+      left: 10%;
+      transition: transform 0.2s linear;
+    }
+    .stats, .chat {
+      background: #222;
+      margin-top: 20px;
+      padding: 10px;
+      height: 150px;
+      overflow-y: auto;
+    }
+    .chat-msg { color: #0cf; }
+    .stat-item { color: #0f0; }
+    .bet-section input, .bet-section button {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .bet-section button {
+      background: red;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #saldo {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .right-panel {
+        width: 100%;
+      }
+      .left-panel {
+        height: 50vh;
+      }
+      .plane {
+        width: 40px;
+      }
     }
   </style>
 </head>
-<body class="bg-gray-900 text-white font-sans">
-
-<!-- VIEW PRINCIPAL -->
-<section id="mainView">
-  <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow mt-10 text-center">
-    <h1 class="text-2xl font-bold text-pink-400 mb-4">Pixcom - Sorteio Pix Instagram!</h1>
-    <p class="text-gray-300 mb-4">Inscreva-se para participar e ganhar um Pix!</p>
-    <p class="mb-4 font-semibold">Status: <span class="text-yellow-400" id="statusText">Inscrições Abertas</span></p>
-    <input type="text" id="instagramHandle" class="input-field" placeholder="@seuinstagram">
-    <input type="text" id="pixKey" class="input-field" placeholder="Chave Pix">
-    <button id="registerButton" class="btn" disabled>Quero Participar!</button>
-    <h2 class="text-xl mt-6 mb-2 font-bold text-green-400">Participantes</h2>
-    <ul id="participantsList" class="mb-2 hidden"></ul>
-    <p id="loadingParticipants">Carregando participantes...</p>
-    <p class="text-sm text-gray-400 mt-2">Seu ID: <span id="userIdDisplay"></span></p>
-    <a href="#" id="adminLink" class="text-blue-400 text-sm mt-2 inline-block">Acesso Admin</a>
+<body>
+  <div class="login-screen" id="login-screen">
+    <h2>Bem-vindo ao AviatorBR</h2>
+    <input type="text" id="nome" placeholder="Seu nome" />
+    <input type="text" id="whatsapp" placeholder="Seu WhatsApp" />
+    <button onclick="entrar()">Entrar</button>
   </div>
-</section>
 
-<!-- VIEW LOGIN -->
-<section id="loginView" class="hidden">
-  <div class="max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow mt-10">
-    <h2 class="text-xl font-bold text-yellow-400 text-center mb-4">Login do Admin</h2>
-    <input type="email" id="adminEmail" class="input-field" placeholder="Email">
-    <input type="password" id="adminPassword" class="input-field" placeholder="Senha">
-    <button id="loginButton" class="btn">Entrar</button>
-  </div>
-</section>
-
-<!-- VIEW ADMIN -->
-<section id="adminPanel" class="hidden">
-  <div class="max-w-xl mx-auto bg-gray-800 p-6 rounded-lg shadow mt-10">
-    <h2 class="text-2xl font-bold text-yellow-300 mb-4 text-center">Painel de Administração</h2>
-    <div class="flex justify-between items-center mb-4">
-      <button id="toggleStatusBtn" class="btn w-1/2 mr-2">Recarregar Lista</button>
-      <button id="logoutButton" class="bg-red-600 text-white px-4 py-2 rounded w-1/2 ml-2">Sair</button>
+  <div class="container" style="display:none" id="jogo">
+    <div class="left-panel">
+      <h1>AviatorBR</h1>
+      <div class="multiplier" id="multiplicador">1.00x</div>
+      <img src="https://cdn-icons-png.flaticon.com/512/67/67347.png" class="plane" id="plane">
+      <div id="saldo">Saldo: R$ <span id="saldo-valor">100.00</span> <button onclick="depositar()">Depositar</button></div>
+      <div class="stats" id="stats"><strong>Últimos Resultados:</strong><br></div>
     </div>
-    <h3 class="text-lg font-bold text-green-300 mt-6 mb-2">Todos os Participantes</h3>
-    <table class="w-full text-sm table-auto text-left text-gray-200">
-      <thead>
-        <tr>
-          <th>@ Instagram</th>
-          <th>Chave Pix</th>
-        </tr>
-      </thead>
-      <tbody id="adminParticipantsList"></tbody>
-    </table>
+    <div class="right-panel">
+      <div class="bet-section">
+        <strong>Aposta 1</strong>
+        <input type="number" id="bet1" placeholder="Valor R$" min="1" value="5" />
+        <input type="number" id="auto1" placeholder="Auto cash-out (ex: 2.0)" step="0.1" />
+        <button onclick="apostar(1)">Apostar</button>
+      </div>
+      <div class="bet-section">
+        <strong>Aposta 2</strong>
+        <input type="number" id="bet2" placeholder="Valor R$" min="1" value="5" />
+        <input type="number" id="auto2" placeholder="Auto cash-out (ex: 3.5)" step="0.1" />
+        <button onclick="apostar(2)">Apostar</button>
+      </div>
+      <div class="chat" id="chat"><strong>Chat:</strong><br></div>
+    </div>
   </div>
-</section>
 
-<!-- FIREBASE -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-  import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+<script>
+  window.onload = () => {
+    let current = 1.00;
+    let running = false;
+    let interval;
+    let saldo = 100;
+    const plane = document.getElementById('plane');
+    const mult = document.getElementById('multiplicador');
+    const stats = document.getElementById('stats');
+    const chat = document.getElementById('chat');
+    const apostas = {
+      1: { ativa: false, valor: 0, auto: 0 },
+      2: { ativa: false, valor: 0, auto: 0 }
+    };
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
-    authDomain: "doce-sabor-caseiro.firebaseapp.com",
-    projectId: "doce-sabor-caseiro",
-    storageBucket: "doce-sabor-caseiro.appspot.com",
-    messagingSenderId: "414062499771",
-    appId: "1:414062499771:web:1a811377bc6bbf145f969e"
-  };
+    window.entrar = () => {
+      const nome = document.getElementById('nome').value;
+      const zap = document.getElementById('whatsapp').value;
+      if (!nome || !zap) return alert('Preencha todos os campos');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('jogo').style.display = 'flex';
+      atualizarSaldo();
+    }
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    function atualizarSaldo() {
+      document.getElementById('saldo-valor').innerText = saldo.toFixed(2);
+    }
 
-  const mainView = document.getElementById("mainView");
-  const loginView = document.getElementById("loginView");
-  const adminPanel = document.getElementById("adminPanel");
-  const registerButton = document.getElementById("registerButton");
-  let currentUID = null;
+    window.depositar = () => {
+      alert('Chave Pix: exemplo@pix.com.br\\nConfirme o pagamento via WhatsApp.');
+    }
 
-  const showView = (view) => {
-    [mainView, loginView, adminPanel].forEach(v => v.classList.add("hidden"));
-    view.classList.remove("hidden");
-  };
-
-  registerButton.disabled = true;
-
-  onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      currentUID = user.uid;
-      document.getElementById("userIdDisplay").textContent = currentUID;
-      const isAdmin = user.providerData[0]?.providerId === "password";
-      showView(isAdmin ? adminPanel : mainView);
-      if (isAdmin) carregarParticipantesAdmin();
-      registerButton.disabled = false;
-    } else {
-      try {
-        await signInAnonymously(auth);
-      } catch (e) {
-        alert("Erro ao autenticar: " + e.message);
+    window.apostar = (id) => {
+      const valor = parseFloat(document.getElementById('bet'+id).value);
+      const auto = parseFloat(document.getElementById('auto'+id).value);
+      if (isNaN(valor) || isNaN(auto) || valor < 1 || auto <= 1.0) {
+        alert('Preencha valores válidos (mínimo R$1 e auto cash-out acima de 1.00x)');
+        return;
       }
+      if (valor > saldo) {
+        alert('Saldo insuficiente!');
+        return;
+      }
+      saldo -= valor;
+      atualizarSaldo();
+      apostas[id] = { ativa: true, valor, auto };
+      chat.innerHTML += `<div class='chat-msg'>Aposta ${id}: R$${valor.toFixed(2)} | Auto ${auto.toFixed(2)}x</div>`;
+      if (!running) iniciarJogo();
     }
-  });
 
-  document.getElementById("adminLink").addEventListener("click", (e) => {
-    e.preventDefault();
-    showView(loginView);
-  });
+    function iniciarJogo() {
+      running = true;
+      current = 1.00;
+      let crashPoint = parseFloat((Math.random() * 5 + 1).toFixed(2));
+      let posX = 10, posY = 60;
+      interval = setInterval(() => {
+        current = parseFloat((current + 0.05).toFixed(2));
+        mult.innerText = current.toFixed(2) + 'x';
+        posX += 2;
+        posY -= 0.5;
+        plane.style.left = posX + '%';
+        plane.style.top = posY + '%';
 
-  document.getElementById("loginButton").onclick = async () => {
-    const email = document.getElementById("adminEmail").value;
-    const password = document.getElementById("adminPassword").value;
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (e) {
-      alert("Erro no login: " + e.message);
+        for (let id in apostas) {
+          if (apostas[id].ativa && current >= apostas[id].auto) {
+            let ganho = apostas[id].valor * apostas[id].auto;
+            saldo += ganho;
+            atualizarSaldo();
+            chat.innerHTML += `<div class='chat-msg'>💰 Aposta ${id} retirada: R$${ganho.toFixed(2)}</div>`;
+            apostas[id].ativa = false;
+          }
+        }
+
+        if (current >= crashPoint) {
+          clearInterval(interval);
+          running = false;
+          mult.innerText += ' 💥';
+          stats.innerHTML += `<div class='stat-item'>${current.toFixed(2)}x</div>`;
+          plane.style.left = '10%';
+          plane.style.top = '60%';
+          apostas[1].ativa = false;
+          apostas[2].ativa = false;
+        }
+      }, 150);
     }
-  };
-
-  document.getElementById("logoutButton").onclick = () => signOut(auth);
-
-  registerButton.onclick = async () => {
-    const instagram = document.getElementById("instagramHandle").value.trim();
-    const chavePix = document.getElementById("pixKey").value.trim();
-    if (!instagram || !chavePix) return alert("Preencha todos os campos!");
-    if (!currentUID) return alert("Aguarde a autenticação...");
-    try {
-      await setDoc(doc(db, "participantes", currentUID), {
-        instagram, chavePix, data: new Date().toISOString()
-      });
-      alert("Inscrição confirmada!");
-    } catch (e) {
-      alert("Erro ao salvar: " + e.message);
-    }
-  };
-
-  const carregarParticipantes = () => {
-    const lista = document.getElementById("participantsList");
-    const carregando = document.getElementById("loadingParticipants");
-    onSnapshot(collection(db, "participantes"), (snapshot) => {
-      carregando.classList.add("hidden");
-      lista.innerHTML = "";
-      snapshot.forEach(doc => {
-        const li = document.createElement("li");
-        li.textContent = doc.data().instagram;
-        lista.appendChild(li);
-      });
-      lista.classList.remove("hidden");
-    });
-  };
-
-  const carregarParticipantesAdmin = async () => {
-    const snapshot = await getDocs(collection(db, "participantes"));
-    const tbody = document.getElementById("adminParticipantsList");
-    tbody.innerHTML = "";
-    snapshot.forEach(doc => {
-      const d = doc.data();
-      tbody.innerHTML += `<tr><td>${d.instagram}</td><td>${d.chavePix}</td></tr>`;
-    });
-  };
-
-  document.getElementById("toggleStatusBtn").onclick = carregarParticipantesAdmin;
-  carregarParticipantes();
+  }
 </script>
-
 </body>
 </html>
