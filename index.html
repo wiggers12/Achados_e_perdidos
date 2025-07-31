@@ -2,119 +2,130 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AviatorBR</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      color: #fff;
-    }
-    .login-screen {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #000;
+      background-color: #0a0a0a;
+      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
+      min-height: 100vh;
     }
-    .login-screen input, .login-screen button {
-      padding: 10px;
-      margin: 8px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
+
+    header {
       width: 100%;
-      max-width: 300px;
+      background-color: #121212;
+      padding: 10px;
+      text-align: center;
+      font-size: 24px;
+      color: #ff0033;
     }
-    .login-screen button {
-      background: red;
-      color: white;
+
+    .multiplier {
+      font-size: 64px;
       font-weight: bold;
-      cursor: pointer;
+      margin: 20px 0;
+      color: #ff0033;
     }
-    .container {
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
-    }
-    .left-panel, .right-panel {
+
+    .screen {
+      background: radial-gradient(circle at center, #1e1e1e, #0a0a0a);
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
       padding: 20px;
-    }
-    .left-panel {
-      flex: 1;
-      background: rgba(0,0,0,0.7);
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
       position: relative;
     }
-    .right-panel {
-      width: 400px;
-      background: #1a1a1a;
-      display: flex;
-      flex-direction: column;
-    }
-    h1 {
-      color: red;
-      text-align: center;
-    }
-    .multiplier {
-      font-size: 48px;
-      text-align: center;
-      margin-top: 10px;
-      color: #f00;
-    }
+
     .plane {
-      position: absolute;
       width: 60px;
+      position: absolute;
       top: 60%;
-      left: 10%;
+      left: 0;
       transition: transform 0.2s linear;
     }
-    .stats, .chat {
-      background: #222;
-      margin-top: 20px;
-      padding: 10px;
-      height: 150px;
-      overflow-y: auto;
+
+    .saldo-container {
+      margin: 10px 0;
+      font-size: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
     }
-    .chat-msg { color: #0cf; }
-    .stat-item { color: #0f0; }
-    .bet-section input, .bet-section button {
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0;
+
+    .btn-depositar {
+      background: #ddd;
+      border: none;
+      border-radius: 10px;
+      padding: 5px 10px;
+      font-weight: bold;
+    }
+
+    .bets {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 20px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .bet-box {
+      background-color: #111;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    .bet-box h3 {
+      margin: 0;
+      margin-bottom: 10px;
+    }
+
+    .quick-values {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .quick-values button {
+      background-color: #333;
+      color: white;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
-    }
-    .bet-section button {
-      background: red;
-      color: #fff;
-      font-weight: bold;
+      padding: 5px 10px;
       cursor: pointer;
     }
-    #saldo {
-      text-align: center;
-      font-size: 18px;
-      margin-top: 10px;
+
+    .bet-input {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
     }
-    #btn-parar {
-      margin: 10px auto;
-      display: none;
-      background-color: orange !important;
+
+    .btn-apostar {
+      background-color: #00cc33;
+      color: white;
+      font-weight: bold;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
     }
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-      }
-      .right-panel {
-        width: 100%;
-      }
-      .left-panel {
-        height: 50vh;
+
+    @media (max-width: 600px) {
+      .multiplier {
+        font-size: 48px;
       }
       .plane {
         width: 40px;
@@ -123,141 +134,74 @@
   </style>
 </head>
 <body>
-  <div class="login-screen" id="login-screen">
-    <h2>Bem-vindo ao AviatorBR</h2>
-    <input type="text" id="nome" placeholder="Seu nome" />
-    <input type="text" id="whatsapp" placeholder="Seu WhatsApp" />
-    <button onclick="entrar()">Entrar</button>
+  <header>AviatorBR</header>
+
+  <div class="screen">
+    <div class="multiplier" id="multiplicador">1.00x</div>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Airplane_silhouette.png" class="plane" id="aviao">
   </div>
 
-  <div class="container" style="display:none" id="jogo">
-    <div class="left-panel">
-      <h1>AviatorBR</h1>
-      <div class="multiplier" id="multiplicador">1.00x</div>
-      <img src="https://cdn.pixabay.com/photo/2013/07/12/15/28/airplane-150798_1280.png" class="plane" id="plane">
-      <div id="saldo">Saldo: R$ <span id="saldo-valor">100.00</span> <button onclick="depositar()">Depositar</button></div>
-      <button id="btn-parar" onclick="parar()">Parar Agora</button>
-      <div class="stats" id="stats"><strong>Últimos Resultados:</strong><br></div>
+  <div class="saldo-container">
+    Saldo: R$ <span id="saldo">100.00</span>
+    <button class="btn-depositar">Depositar</button>
+  </div>
+
+  <div class="bets">
+    <div class="bet-box">
+      <h3>Aposta 1</h3>
+      <div class="quick-values">
+        <button onclick="setBet('aposta1', 10)">10</button>
+        <button onclick="setBet('aposta1', 20)">20</button>
+        <button onclick="setBet('aposta1', 50)">50</button>
+        <button onclick="setBet('aposta1', 100)">100</button>
+      </div>
+      <input id="aposta1" class="bet-input" type="number" placeholder="Digite o valor">
+      <input id="auto1" class="bet-input" type="number" placeholder="Auto cash-out (ex: 2.0)">
+      <button class="btn-apostar" onclick="apostar(1)">APOSTA</button>
     </div>
-    <div class="right-panel">
-      <div class="bet-section">
-        <strong>Aposta 1</strong>
-        <input type="number" id="bet1" placeholder="Valor R$" min="1" value="5" />
-        <input type="number" id="auto1" placeholder="Auto cash-out (ex: 2.0)" step="0.1" />
-        <button onclick="apostar(1)">Apostar</button>
+
+    <div class="bet-box">
+      <h3>Aposta 2</h3>
+      <div class="quick-values">
+        <button onclick="setBet('aposta2', 10)">10</button>
+        <button onclick="setBet('aposta2', 20)">20</button>
+        <button onclick="setBet('aposta2', 50)">50</button>
+        <button onclick="setBet('aposta2', 100)">100</button>
       </div>
-      <div class="bet-section">
-        <strong>Aposta 2</strong>
-        <input type="number" id="bet2" placeholder="Valor R$" min="1" value="5" />
-        <input type="number" id="auto2" placeholder="Auto cash-out (ex: 3.5)" step="0.1" />
-        <button onclick="apostar(2)">Apostar</button>
-      </div>
-      <div class="chat" id="chat"><strong>Chat:</strong><br></div>
+      <input id="aposta2" class="bet-input" type="number" placeholder="Digite o valor">
+      <input id="auto2" class="bet-input" type="number" placeholder="Auto cash-out (ex: 3.5)">
+      <button class="btn-apostar" onclick="apostar(2)">APOSTA</button>
     </div>
   </div>
 
-<script>
-  window.onload = () => {
-    let current = 1.00;
-    let running = false;
-    let interval;
+  <script>
+    let multiplicador = 1.00;
     let saldo = 100;
-    const plane = document.getElementById('plane');
-    const mult = document.getElementById('multiplicador');
-    const stats = document.getElementById('stats');
-    const chat = document.getElementById('chat');
-    const pararBtn = document.getElementById('btn-parar');
-    const apostas = {
-      1: { ativa: false, valor: 0, auto: 0 },
-      2: { ativa: false, valor: 0, auto: 0 }
-    };
+    let aviao = document.getElementById("aviao");
+    let intervalo;
 
-    window.entrar = () => {
-      const nome = document.getElementById('nome').value;
-      const zap = document.getElementById('whatsapp').value;
-      if (!nome || !zap) return alert('Preencha todos os campos');
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('jogo').style.display = 'flex';
-      atualizarSaldo();
+    function startGame() {
+      multiplicador = 1.00;
+      intervalo = setInterval(() => {
+        multiplicador = (multiplicador + 0.01).toFixed(2);
+        document.getElementById("multiplicador").innerText = multiplicador + "x";
+        aviao.style.transform = `translateX(${multiplicador * 50}px) translateY(-${multiplicador * 5}px)`;
+      }, 100);
     }
 
-    function atualizarSaldo() {
-      document.getElementById('saldo-valor').innerText = saldo.toFixed(2);
+    function setBet(id, valor) {
+      document.getElementById(id).value = valor;
     }
 
-    window.depositar = () => {
-      alert('Chave Pix: exemplo@pix.com.br\nConfirme o pagamento via WhatsApp.');
-    }
-
-    window.apostar = (id) => {
-      const valor = parseFloat(document.getElementById('bet'+id).value);
-      const auto = parseFloat(document.getElementById('auto'+id).value);
-      if (isNaN(valor) || isNaN(auto) || valor < 1 || auto <= 1.0) {
-        alert('Preencha valores válidos (mínimo R$1 e auto cash-out acima de 1.00x)');
-        return;
-      }
-      if (valor > saldo) {
-        alert('Saldo insuficiente!');
-        return;
-      }
+    function apostar(numero) {
+      let valor = parseFloat(document.getElementById(`aposta${numero}`).value);
+      if (valor > saldo) return alert("Saldo insuficiente");
       saldo -= valor;
-      atualizarSaldo();
-      apostas[id] = { ativa: true, valor, auto };
-      chat.innerHTML += `<div class='chat-msg'>Aposta ${id}: R$${valor.toFixed(2)} | Auto ${auto.toFixed(2)}x</div>`;
-      if (!running) iniciarJogo();
+      document.getElementById("saldo").innerText = saldo.toFixed(2);
+      // adicionar mais lógica aqui...
     }
 
-    window.parar = () => {
-      for (let id in apostas) {
-        if (apostas[id].ativa) {
-          let ganho = apostas[id].valor * current;
-          saldo += ganho;
-          atualizarSaldo();
-          chat.innerHTML += `<div class='chat-msg'>🛑 Aposta ${id} retirada manual: R$${ganho.toFixed(2)}</div>`;
-          apostas[id].ativa = false;
-        }
-      }
-      pararBtn.style.display = 'none';
-    }
-
-    function iniciarJogo() {
-      running = true;
-      current = 1.00;
-      let crashPoint = parseFloat((Math.random() * 5 + 1).toFixed(2));
-      let posX = 10, posY = 60;
-      pararBtn.style.display = 'block';
-      interval = setInterval(() => {
-        current = parseFloat((current + 0.05).toFixed(2));
-        mult.innerText = current.toFixed(2) + 'x';
-        posX += 2;
-        posY -= 0.5;
-        plane.style.left = posX + '%';
-        plane.style.top = posY + '%';
-
-        for (let id in apostas) {
-          if (apostas[id].ativa && current >= apostas[id].auto) {
-            let ganho = apostas[id].valor * apostas[id].auto;
-            saldo += ganho;
-            atualizarSaldo();
-            chat.innerHTML += `<div class='chat-msg'>💰 Aposta ${id} retirada: R$${ganho.toFixed(2)}</div>`;
-            apostas[id].ativa = false;
-          }
-        }
-
-        if (current >= crashPoint) {
-          clearInterval(interval);
-          running = false;
-          mult.innerText += ' 💥';
-          stats.innerHTML += `<div class='stat-item'>${current.toFixed(2)}x</div>`;
-          plane.style.left = '10%';
-          plane.style.top = '60%';
-          apostas[1].ativa = false;
-          apostas[2].ativa = false;
-          pararBtn.style.display = 'none';
-        }
-      }, 150);
-    }
-  }
-</script>
+    startGame();
+  </script>
 </body>
 </html>
