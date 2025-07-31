@@ -1,113 +1,56 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Carteira - Plane.Money</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
-    h1 {
-      color: #0f0;
-      margin-bottom: 20px;
-    }
-    .card {
       background: #1e1e1e;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
-      width: 300px;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: none;
-      font-size: 1em;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
     }
     button {
-      width: 100%;
-      padding: 10px;
+      margin: 10px;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 10px;
       background-color: #00cc00;
-      border: none;
-      border-radius: 5px;
       color: white;
-      font-size: 1em;
+      border: none;
       cursor: pointer;
-    }
-    #saldoAtual {
-      text-align: center;
-      font-size: 1.5em;
-      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Carteira</h1>
-    <div id="saldoAtual">Saldo: R$ <span id="saldo">0.00</span></div>
-    <input type="number" id="valorDeposito" placeholder="Valor para depositar" />
-    <button onclick="depositar()">Depositar</button>
-    <br /><br />
-    <input type="number" id="valorSaque" placeholder="Valor para sacar" />
-    <button onclick="sacar()">Sacar</button>
-  </div>
+  <h1>Carteira Plane.Money</h1>
+  <p>⚠️ Simulação de saldo, Firebase Firestore não implementado ainda</p>
 
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js"></script>
-  <script src="firebase.js"></script>
+  <button onclick="depositar()">Depositar R$50</button>
+  <button onclick="sacar()">Sacar R$50</button>
+  <p id="saldoAtual">Saldo: R$100,00</p>
+
   <script>
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    let saldo = 100;
 
-    auth.onAuthStateChanged(async user => {
-      if (!user) return window.location.href = "auth.html";
+    function depositar() {
+      saldo += 50;
+      atualizarSaldo();
+    }
 
-      const uid = user.uid;
-      const saldoRef = db.collection("usuarios").doc(uid);
-      const doc = await saldoRef.get();
-
-      let saldo = 0;
-      if (doc.exists) {
-        saldo = doc.data().saldo || 0;
+    function sacar() {
+      if (saldo >= 50) {
+        saldo -= 50;
+        atualizarSaldo();
       } else {
-        await saldoRef.set({ saldo: 0 });
+        alert("Saldo insuficiente!");
       }
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
+    }
 
-      window.depositar = async () => {
-        const valor = parseFloat(document.getElementById("valorDeposito").value);
-        if (!isNaN(valor) && valor > 0) {
-          saldo += valor;
-          await saldoRef.set({ saldo });
-          document.getElementById("saldo").innerText = saldo.toFixed(2);
-          alert("Depósito realizado com sucesso!");
-        }
-      };
-
-      window.sacar = async () => {
-        const valor = parseFloat(document.getElementById("valorSaque").value);
-        if (!isNaN(valor) && valor > 0 && valor <= saldo) {
-          saldo -= valor;
-          await saldoRef.set({ saldo });
-          document.getElementById("saldo").innerText = saldo.toFixed(2);
-          alert("Saque realizado com sucesso!");
-        } else {
-          alert("Saldo insuficiente ou valor inválido.");
-        }
-      };
-    });
+    function atualizarSaldo() {
+      document.getElementById("saldoAtual").innerText = "Saldo: R$" + saldo.toFixed(2);
+    }
   </script>
 </body>
 </html>
