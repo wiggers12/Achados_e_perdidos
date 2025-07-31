@@ -12,6 +12,7 @@
       color: #fff;
       overflow-x: hidden;
     }
+
     .title {
       text-align: center;
       font-size: 2.5em;
@@ -19,44 +20,60 @@
       color: #f00;
       font-family: 'Orbitron', sans-serif;
     }
+
     .multiplier {
       text-align: center;
       font-size: 4em;
       color: #f00;
       font-weight: bold;
     }
-    .voo-container {
+
+    .aviator-box {
       position: relative;
       width: 100%;
-      max-width: 600px;
-      height: 200px;
-      margin: 0 auto 20px;
+      height: 250px;
       background: #1a1a1a;
-      border: 2px solid #f00;
-      border-radius: 10px;
       overflow: hidden;
+      border-bottom: 2px solid #f00;
     }
+
     .aviator-img {
       position: absolute;
-      top: 80px;
+      top: 100px;
       left: 0;
-      width: 80px;
+      width: 100px;
       height: auto;
-      transition: transform 0.3s linear;
       z-index: 2;
     }
+
     .rastro {
       position: absolute;
-      top: 115px;
+      top: 120px;
       left: 0;
       height: 5px;
-      background: red;
+      background-color: red;
       z-index: 1;
     }
-    .saldo {
-      text-align: center;
-      font-size: 1.2em;
+
+    .saldo-topo {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #222;
+      border-radius: 20px;
+      padding: 8px 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 10px rgba(255,0,0,0.3);
+      z-index: 10;
     }
+
+    .saldo-topo img {
+      width: 24px;
+      height: 24px;
+    }
+
     .depositar {
       text-align: center;
       background-color: #ccc;
@@ -67,6 +84,7 @@
       width: fit-content;
       cursor: pointer;
     }
+
     .resultados, .apostas-container {
       background-color: #222;
       padding: 15px;
@@ -75,6 +93,7 @@
       width: 90%;
       max-width: 400px;
     }
+
     .botao-verde {
       background-color: #00cc00;
       color: white;
@@ -85,6 +104,7 @@
       cursor: pointer;
       width: 100%;
     }
+
     .valores-rapidos button {
       margin: 5px;
       padding: 5px 10px;
@@ -94,6 +114,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     .input-aposta {
       width: calc(100% - 10px);
       padding: 10px;
@@ -102,17 +123,31 @@
       border-radius: 5px;
       border: none;
     }
+
+    .ganho-msg {
+      text-align: center;
+      font-size: 1.4em;
+      color: #0f0;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
+  <div class="saldo-topo">
+    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="ícone saldo">
+    <span>R$ <span id="saldo">100.00</span></span>
+  </div>
+
   <div class="title">AviatorBR</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
-  <div class="voo-container">
-    <div class="rastro" id="rastro" style="width: 0;"></div>
+
+  <div class="aviator-box">
+    <div class="rastro" id="rastro"></div>
     <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" class="aviator-img" alt="Avião" />
   </div>
-  <div class="saldo">Saldo: R$ <span id="saldo">100.00</span></div>
+
   <div class="depositar" onclick="depositar()">Depositar</div>
+
   <div class="resultados">
     <strong>Últimos Resultados:</strong>
     <div id="ultimos"></div>
@@ -130,6 +165,7 @@
       <button onclick="setValor('aposta1', 100)">100</button>
     </div>
     <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
+    <div id="ganho1" class="ganho-msg"></div>
   </div>
 
   <!-- Aposta 2 -->
@@ -144,6 +180,7 @@
       <button onclick="setValor('aposta2', 100)">100</button>
     </div>
     <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
+    <div id="ganho2" class="ganho-msg"></div>
   </div>
 
   <script>
@@ -152,30 +189,40 @@
     let rodando = false;
     let intervalo;
     let posicao = 0;
-    let limiteAleatorio = 0;
+    let tempoLimite;
 
     function atualizarMultiplicador() {
       if (!rodando) return;
       multiplicador += 0.05;
       document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
-      posicao += 5;
-      document.getElementById("aviao").style.transform = `translateX(${posicao}px)`;
-      document.getElementById("rastro").style.width = `${posicao + 50}px`;
 
-      if (multiplicador >= limiteAleatorio) {
-        pararRodada();
+      posicao += 4;
+      document.getElementById("aviao").style.left = posicao + "px";
+      document.getElementById("rastro").style.width = (posicao + 50) + "px";
+
+      if (Date.now() > tempoLimite) {
+        encerrarRodadaAuto();
       }
     }
 
     function iniciarRodada() {
       multiplicador = 1.00;
       posicao = 0;
-      limiteAleatorio = 1.5 + Math.random() * 4;
-      document.getElementById("aviao").style.transform = `translateX(0)`;
-      document.getElementById("rastro").style.width = "0";
       rodando = true;
       document.getElementById('multiplicador').innerText = '1.00x';
-      intervalo = setInterval(atualizarMultiplicador, 150);
+      document.getElementById("aviao").style.left = "0px";
+      document.getElementById("rastro").style.width = "0px";
+      document.getElementById("ganho1").innerText = "";
+      document.getElementById("ganho2").innerText = "";
+
+      tempoLimite = Date.now() + (Math.random() * 4000 + 3000); // 3~7s
+      intervalo = setInterval(atualizarMultiplicador, 100);
+    }
+
+    function encerrarRodadaAuto() {
+      clearInterval(intervalo);
+      rodando = false;
+      document.getElementById("aviao").style.left = "100vw";
     }
 
     function apostar(num) {
@@ -193,20 +240,15 @@
     }
 
     function encerrarAposta(num, valor) {
-      if (!rodando) return;
       clearInterval(intervalo);
       rodando = false;
       const ganho = valor * multiplicador;
       saldo += ganho;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
+      document.getElementById(`ganho${num}`).innerText = `Você ganhou R$ ${ganho.toFixed(2)}!`;
       document.getElementById(`botao${num}`).innerText = 'Apostar';
       document.getElementById(`botao${num}`).onclick = function () { apostar(num); };
-    }
-
-    function pararRodada() {
-      clearInterval(intervalo);
-      rodando = false;
-      document.getElementById("aviao").style.transform = `translateX(100vw)`;
+      document.getElementById("aviao").style.left = "100vw";
     }
 
     function setValor(inputId, valor) {
