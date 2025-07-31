@@ -12,36 +12,34 @@
       color: #fff;
       overflow-x: hidden;
     }
-    .header {
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 20px;
+      padding: 10px 15px;
     }
-    .title {
-      font-size: 1.8em;
-      color: #f00;
-      font-family: 'Orbitron', sans-serif;
+    .game-title {
+      font-size: 1.6em;
+      font-weight: bold;
+      color: red;
     }
     .saldo {
       background: #2c2c2c;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 1em;
     }
     .saldo-icon {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
     }
     .multiplier {
       text-align: center;
       font-size: 3em;
       color: #f00;
       font-weight: bold;
-      margin-bottom: 10px;
     }
     #gameArea {
       position: relative;
@@ -82,9 +80,9 @@
     }
     .acoes button {
       margin: 5px;
-      padding: 5px 15px;
-      background-color: #444;
-      color: #fff;
+      padding: 6px 15px;
+      background-color: #ccc;
+      color: #000;
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -127,10 +125,11 @@
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="title">Plane.Money</div>
+
+  <div class="top-bar">
+    <div class="game-title">Plane.Money</div>
     <div class="saldo">
-      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/1170/1170576.png" />
+      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/484/484196.png" />
       R$ <span id="saldo">100.00</span>
     </div>
   </div>
@@ -162,7 +161,7 @@
   <div class="apostas-container">
     <strong>Aposta 2</strong>
     <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
-    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 2.5)" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.5)" />
     <div class="valores-rapidos">
       <button onclick="setValor('aposta2', 10)">10</button>
       <button onclick="setValor('aposta2', 20)">20</button>
@@ -245,10 +244,10 @@
 
       const botao = document.getElementById(`botao${num}`);
       botao.innerText = 'Encerrar Aposta';
-      botao.onclick = function () { encerrarAposta(num, valor, false, true); };
+      botao.onclick = function () { encerrarAposta(num, valor, false); };
     }
 
-    function encerrarAposta(num, valor, auto = false, parar = false) {
+    function encerrarAposta(num, valor, auto = false) {
       const ganho = valor * multiplicador;
       saldo += ganho;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
@@ -259,10 +258,6 @@
       const botao = document.getElementById(`botao${num}`);
       botao.innerText = 'Apostar';
       botao.onclick = function () { apostar(num); };
-
-      if (parar) {
-        encerrarRodada();
-      }
     }
 
     function encerrarRodada() {
@@ -270,8 +265,14 @@
       rodando = false;
       aviao.style.transform = `translate(100vw, -200px)`;
 
-      apostaAtiva.forEach((valor, idx) => {
-        if (valor) apostaAtiva[idx] = null;
+      [1, 2].forEach(num => {
+        if (apostaAtiva[num - 1]) {
+          apostaAtiva[num - 1] = null;
+          autoCash[num - 1] = null;
+          const botao = document.getElementById(`botao${num}`);
+          botao.innerText = 'Apostar';
+          botao.onclick = function () { apostar(num); };
+        }
       });
 
       setTimeout(() => {
