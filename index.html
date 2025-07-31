@@ -4,7 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plane.Money</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" />
+  <script type="module">
+    import { auth } from './firebase.js';
+    import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    onAuthStateChanged(auth, user => {
+      if (!user) location.href = "auth.html";
+    });
+  </script>
   <style>
     body {
       margin: 0;
@@ -13,95 +19,88 @@
       color: #fff;
       overflow-x: hidden;
     }
-
     .title {
       position: absolute;
       top: 10px;
-      left: 10px;
-      font-size: 1.8em;
-      color: #f00;
-      font-family: 'Orbitron', sans-serif;
-      z-index: 10;
+      left: 15px;
+      font-size: 2em;
+      color: red;
+      font-weight: bold;
     }
-
-    .multiplier {
+    .saldo {
       position: absolute;
       top: 10px;
       right: 10px;
-      font-size: 2.5em;
-      font-weight: bold;
-      color: #00ff00;
-      z-index: 10;
+      background: #2c2c2c;
+      padding: 10px 15px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 1em;
     }
-
+    .saldo-icon {
+      width: 20px;
+      height: 20px;
+    }
     #gameArea {
       position: relative;
       width: 100%;
       height: 300px;
-      background: linear-gradient(to bottom, #1e1e1e, #2a2a2a);
+      background: #1e1e1e;
       overflow: hidden;
       margin-bottom: 10px;
-      border-bottom: 2px solid #333;
     }
-
     #aviao {
       position: absolute;
       top: 200px;
       left: 0;
       width: 100px;
-      transition: transform 0.1s linear;
+      height: auto;
       z-index: 5;
     }
-
-    .saldo {
+    .trail {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: red;
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: fadeOut 1s linear forwards;
+      z-index: 1;
+    }
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+    }
+    .multiplier {
       position: absolute;
       top: 10px;
-      left: 120px;
-      background: #2c2c2c;
-      padding: 8px 15px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 10;
+      right: 15px;
+      font-size: 3em;
+      color: #f00;
+      font-weight: bold;
     }
-
-    .saldo-icon {
-      width: 24px;
-      height: 24px;
-      filter: brightness(1.2);
-    }
-
-    .acoes {
+    .acoes, .apostas-container {
       text-align: center;
       margin: 10px;
     }
-
-    .acoes button {
+    .acoes button, .logout {
       margin: 5px;
-      padding: 8px 18px;
-      background-color: #00bcd4;
-      color: #fff;
+      padding: 5px 15px;
+      background-color: #ccc;
+      color: #000;
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
     }
-
-    .acoes button:hover {
-      background-color: #008c9e;
+    .logout {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
     }
-
-    .apostas-container {
-      background-color: #222;
-      padding: 15px;
-      margin: 10px auto;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
-    }
-
     .botao-verde {
       background-color: #00cc00;
       color: white;
@@ -111,14 +110,15 @@
       border-radius: 10px;
       cursor: pointer;
       width: 100%;
-      font-weight: bold;
-      transition: background 0.3s;
     }
-
-    .botao-verde:hover {
-      background-color: #009900;
+    .input-aposta {
+      width: calc(100% - 10px);
+      padding: 10px;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
     }
-
     .valores-rapidos button {
       margin: 5px;
       padding: 5px 10px;
@@ -128,15 +128,6 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
-    .input-aposta {
-      width: 100%;
-      padding: 10px;
-      font-size: 1.1em;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-    }
   </style>
 </head>
 <body>
@@ -145,16 +136,17 @@
   <div class="multiplier" id="multiplicador">1.00x</div>
 
   <div id="gameArea">
-    <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" />
+    <img src="IMG_5585.jpeg" id="aviao" />
     <div class="saldo">
-      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/25/25473.png" />
+      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
       R$ <span id="saldo">100.00</span>
     </div>
   </div>
 
   <div class="acoes">
     <button onclick="depositar()">💰 Depositar</button>
-    <button onclick="sacar()">🏧 Sacar</button>
+    <button onclick="sacar()">🏦 Sacar</button>
+    <button onclick="window.location.href='wallet.html'">Carteira</button>
   </div>
 
   <div class="apostas-container">
@@ -173,7 +165,7 @@
   <div class="apostas-container">
     <strong>Aposta 2</strong>
     <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
-    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.5)" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.0)" />
     <div class="valores-rapidos">
       <button onclick="setValor('aposta2', 10)">10</button>
       <button onclick="setValor('aposta2', 20)">20</button>
@@ -182,6 +174,14 @@
     </div>
     <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
   </div>
+
+  <button class="logout" onclick="logout()">Sair</button>
+
+  <script type="module">
+    import { auth } from './firebase.js';
+    import { signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    window.logout = () => signOut(auth).then(() => location.href = "auth.html");
+  </script>
 
   <script>
     let saldo = 100.00;
@@ -207,6 +207,12 @@
       if (altura < 50) altura = 50;
 
       aviao.style.transform = `translate(${posicao}px, ${-1 * (200 - altura)}px)`;
+
+      const trail = document.createElement("div");
+      trail.className = "trail";
+      trail.style.left = aviao.offsetLeft + 50 + "px";
+      trail.style.top = altura + 65 + "px";
+      gameArea.appendChild(trail);
 
       [1, 2].forEach(num => {
         if (apostaAtiva[num - 1]) {
@@ -254,9 +260,12 @@
     }
 
     function encerrarAposta(num, valor, auto = false) {
+      if (!rodando) return;
+
       const ganho = valor * multiplicador;
       saldo += ganho;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
+      alert((auto ? "Auto Cash-out: " : "Aposta encerrada: ") + `R$ ${ganho.toFixed(2)}`);
 
       apostaAtiva[num - 1] = null;
       autoCash[num - 1] = null;
@@ -273,6 +282,7 @@
 
       [1, 2].forEach(num => {
         if (apostaAtiva[num - 1]) {
+          alert(`Aposta ${num} perdida`);
           apostaAtiva[num - 1] = null;
           autoCash[num - 1] = null;
           const botao = document.getElementById(`botao${num}`);
@@ -296,7 +306,7 @@
     }
 
     function sacar() {
-      alert("Saque solicitado com sucesso! (Simulação)");
+      alert("Saque solicitado com sucesso! (simulação)");
     }
   </script>
 </body>
