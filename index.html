@@ -176,22 +176,17 @@
     let paradaAleatoria = 0;
     let apostaAtiva = [null, null];
     let autoCash = [null, null];
-
     const aviao = document.getElementById("aviao");
     const gameArea = document.getElementById("gameArea");
 
     function atualizarMultiplicador() {
       if (!rodando) return;
-
       multiplicador += 0.05;
       document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
-
       posicao += multiplicador * 1.2;
       let altura = 200 - posicao * 0.25;
       if (altura < 50) altura = 50;
-
       aviao.style.transform = `translate(${posicao}px, ${-1 * (200 - altura)}px)`;
-
       const trail = document.createElement("div");
       trail.className = "trail";
       trail.style.left = aviao.offsetLeft + 50 + "px";
@@ -225,33 +220,28 @@
     function apostar(num) {
       const valor = parseFloat(document.getElementById(`aposta${num}`).value);
       const cash = parseFloat(document.getElementById(`auto${num}`).value);
-
       if (valor > saldo || isNaN(valor) || valor <= 0) {
         alert('Aposta inválida');
         return;
       }
-
       saldo -= valor;
       apostaAtiva[num - 1] = valor;
       autoCash[num - 1] = cash;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
-
       if (!rodando) iniciarRodada();
-
       const botao = document.getElementById(`botao${num}`);
       botao.innerText = 'Encerrar Aposta';
       botao.onclick = function () { encerrarAposta(num, valor, false); };
     }
 
     function encerrarAposta(num, valor, auto = false) {
+      if (!rodando) return;
       const ganho = valor * multiplicador;
       saldo += ganho;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
       alert((auto ? "Auto Cash-out: " : "Aposta encerrada: ") + `R$ ${ganho.toFixed(2)}`);
-
       apostaAtiva[num - 1] = null;
       autoCash[num - 1] = null;
-
       const botao = document.getElementById(`botao${num}`);
       botao.innerText = 'Apostar';
       botao.onclick = function () { apostar(num); };
@@ -261,6 +251,17 @@
       clearInterval(intervalo);
       rodando = false;
       aviao.style.transform = `translate(100vw, -200px)`;
+
+      apostaAtiva.forEach((valor, index) => {
+        if (valor !== null) {
+          alert(`Aposta ${index + 1} perdeu R$ ${valor.toFixed(2)}!`);
+          const botao = document.getElementById(`botao${index + 1}`);
+          botao.innerText = 'Apostar';
+          botao.onclick = function () { apostar(index + 1); };
+          apostaAtiva[index] = null;
+          autoCash[index] = null;
+        }
+      });
 
       setTimeout(() => {
         aviao.style.transform = `translate(0, 0)`;
