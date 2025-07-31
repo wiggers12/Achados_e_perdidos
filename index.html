@@ -7,127 +7,173 @@
   <style>
     body {
       margin: 0;
-      background: #111;
-      font-family: Arial, sans-serif;
-      color: white;
-      overflow-x: hidden;
-    }
-    .header {
-      text-align: center;
-      font-size: 28px;
-      padding: 10px;
-      color: red;
-      font-weight: bold;
-    }
-    .multiplier {
-      font-size: 64px;
-      text-align: center;
-      color: red;
-    }
-    #aviao {
-      position: absolute;
-      bottom: 40px;
-      left: 30px;
-      height: 60px;
-      transition: transform 0.1s ease;
-    }
-    .painel {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #121212;
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #222;
-      padding: 20px;
-      margin-top: 240px;
+      justify-content: flex-start;
     }
-    input, button {
-      font-size: 18px;
+    .title {
+      font-size: 2.5em;
+      margin-top: 20px;
+      color: #f00;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .multiplier {
+      font-size: 4em;
+      margin: 10px;
+      color: #f00;
+      font-weight: bold;
+    }
+    .saldo {
+      font-size: 1.2em;
       margin: 5px;
-      padding: 10px;
     }
-    .green-btn {
-      background-color: limegreen;
+    .depositar {
+      background-color: #ccc;
+      color: #000;
+      padding: 5px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .resultados, .apostas-container {
+      background-color: #222;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .botao-verde {
+      background-color: #00cc00;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 10px;
+      font-size: 1.2em;
+      border-radius: 10px;
       cursor: pointer;
-      font-weight: bold;
+      width: 100%;
+    }
+    .valores-rapidos button {
+      margin: 5px;
+      padding: 5px 10px;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .aposta-bloco {
+      margin-top: 10px;
+    }
+    .input-aposta {
+      width: calc(100% - 10px);
+      padding: 10px;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    .aviator-img {
+      width: 100px;
+      height: auto;
+      animation: voar 3s infinite linear;
+    }
+    @keyframes voar {
+      from { transform: translateY(0); }
+      to { transform: translateY(-20px); }
     }
   </style>
 </head>
 <body>
-  <div class="header">AviatorBR</div>
+  <div class="title">AviatorBR</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
-  <img id="aviao" src="aviao.png" alt="avião" />
-
-  <div class="painel">
-    <div>
-      <label>Valor da Aposta:</label>
-      <input type="number" id="aposta" value="10" min="1" />
+  <img src="https://wiggers12.github.io/assets/aviator-plane.png" class="aviator-img" alt="Avião" />
+  <div class="saldo">Saldo: R$ <span id="saldo">100.00</span></div>
+  <div class="depositar" onclick="depositar()">Depositar</div>
+  <div class="resultados">
+    <strong>Últimos Resultados:</strong>
+    <div id="ultimos"></div>
+  </div>
+  <div class="apostas-container">
+    <div><strong>Aposta 1</strong></div>
+    <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto1" type="number" placeholder="Auto cash-out (ex: 2.0)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta1', 10)">10</button>
+      <button onclick="setValor('aposta1', 20)">20</button>
+      <button onclick="setValor('aposta1', 50)">50</button>
+      <button onclick="setValor('aposta1', 100)">100</button>
     </div>
-    <div>
-      <button class="green-btn" id="btnAposta" onclick="apostar()">Apostar</button>
+    <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
+  </div>
+  <div class="apostas-container">
+    <div><strong>Aposta 2</strong></div>
+    <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.5)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta2', 10)">10</button>
+      <button onclick="setValor('aposta2', 20)">20</button>
+      <button onclick="setValor('aposta2', 50)">50</button>
+      <button onclick="setValor('aposta2', 100)">100</button>
     </div>
-    <div>
-      <span>Saldo: R$ <span id="saldo">100.00</span></span>
-    </div>
+    <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
   </div>
 
   <script>
-    let saldo = 100;
-    let apostaAtual = 0;
-    let multiplicador = 1.0;
+    let saldo = 100.00;
+    let multiplicador = 1.00;
     let rodando = false;
-    let intervalo;
+    let interval;
 
-    function apostar() {
-      if (rodando) {
-        encerrarAposta();
-        return;
-      }
-      apostaAtual = parseFloat(document.getElementById("aposta").value);
-      if (apostaAtual > saldo || apostaAtual <= 0) return alert("Aposta inválida");
-      saldo -= apostaAtual;
-      updateSaldo();
-      document.getElementById("btnAposta").innerText = "Encerrar Aposta";
-      iniciarRodada();
+    function atualizarMultiplicador() {
+      if (!rodando) return;
+      multiplicador += 0.05;
+      document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
     }
 
     function iniciarRodada() {
-      multiplicador = 1.0;
+      multiplicador = 1.00;
       rodando = true;
-      intervalo = setInterval(() => {
-        multiplicador += 0.05;
-        document.getElementById("multiplicador").innerText = multiplicador.toFixed(2) + 'x';
-
-        const aviao = document.getElementById("aviao");
-        let deslocamento = 30 + (multiplicador * 40);
-        aviao.style.left = deslocamento + 'px';
-
-        // Simula crash aleatório
-        if (Math.random() < 0.01 + multiplicador * 0.01) {
-          encerrarJogo(false);
-        }
-      }, 200);
+      document.getElementById('multiplicador').innerText = '1.00x';
+      interval = setInterval(atualizarMultiplicador, 200);
     }
 
-    function encerrarAposta() {
-      clearInterval(intervalo);
-      let ganho = apostaAtual * multiplicador;
+    function apostar(num) {
+      const valor = parseFloat(document.getElementById(`aposta${num}`).value);
+      if (valor > saldo || isNaN(valor) || valor <= 0) {
+        alert('Aposta inválida');
+        return;
+      }
+      saldo -= valor;
+      document.getElementById('saldo').innerText = saldo.toFixed(2);
+      iniciarRodada();
+      const botao = document.getElementById(`botao${num}`);
+      botao.innerText = 'Encerrar Aposta';
+      botao.onclick = function () { encerrarAposta(num, valor); };
+    }
+
+    function encerrarAposta(num, valor) {
+      clearInterval(interval);
+      rodando = false;
+      const ganho = valor * multiplicador;
       saldo += ganho;
-      updateSaldo();
-      document.getElementById("btnAposta").innerText = "Apostar";
-      rodando = false;
+      document.getElementById('saldo').innerText = saldo.toFixed(2);
+      document.getElementById(`botao${num}`).innerText = 'Apostar';
+      document.getElementById(`botao${num}`).onclick = function () { apostar(num); };
+      multiplicador = 1.00;
     }
 
-    function encerrarJogo(perdeu) {
-      clearInterval(intervalo);
-      if (perdeu) alert("Explodiu! Você perdeu.");
-      document.getElementById("btnAposta").innerText = "Apostar";
-      rodando = false;
+    function setValor(inputId, valor) {
+      document.getElementById(inputId).value = valor;
     }
 
-    function updateSaldo() {
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
+    function depositar() {
+      saldo += 50;
+      document.getElementById('saldo').innerText = saldo.toFixed(2);
     }
   </script>
 </body>
