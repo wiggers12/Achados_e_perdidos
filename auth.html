@@ -2,73 +2,54 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Plane.Money</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #111;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+      color: #fff;
+      text-align: center;
+      padding: 50px;
     }
     input, button {
+      display: block;
+      margin: 10px auto;
       padding: 10px;
-      margin: 5px;
-      border: none;
-      border-radius: 5px;
-      width: 250px;
+      font-size: 16px;
+      border-radius: 8px;
     }
     button {
-      background-color: #00c853;
-      color: white;
-      font-weight: bold;
+      background-color: #00cc00;
+      color: #fff;
+      border: none;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h2>Login no Plane.Money</h2>
+  <h1>Plane.Money</h1>
+  <h2>Login / Cadastro</h2>
+  <input type="email" id="email" placeholder="E-mail" />
+  <input type="password" id="senha" placeholder="Senha" />
+  <button onclick="login()">Entrar</button>
+  <button onclick="registrar()">Cadastrar</button>
 
-  <input type="email" id="email" placeholder="Digite seu e-mail" />
-  <input type="password" id="senha" placeholder="Digite sua senha" />
-  <button onclick="loginUser()">Entrar</button>
-  <button onclick="registerUser()">Cadastrar</button>
+  <script type="module">
+    import { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from './firebase.js';
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="firebase.js"></script>
-  <script>
-    const auth = firebase.auth();
+    const emailInput = document.getElementById('email');
+    const senhaInput = document.getElementById('senha');
 
-    function loginUser() {
-      const email = document.getElementById("email").value;
-      const senha = document.getElementById("senha").value;
-
-      auth.signInWithEmailAndPassword(email, senha)
-        .then(() => {
-          window.location.href = "index.html";
-        })
-        .catch(error => {
-          alert("Erro ao fazer login: " + error.message);
-        });
+    window.login = () => {
+      signInWithEmailAndPassword(auth, emailInput.value, senhaInput.value)
+        .then(() => window.location.href = 'index.html')
+        .catch(err => alert("Erro no login: " + err.message));
     }
 
-    function registerUser() {
-      const email = document.getElementById("email").value;
-      const senha = document.getElementById("senha").value;
-
-      auth.createUserWithEmailAndPassword(email, senha)
-        .then(() => {
-          alert("Cadastro realizado com sucesso!");
-          window.location.href = "index.html";
-        })
-        .catch(error => {
-          alert("Erro ao cadastrar: " + error.message);
-        });
+    window.registrar = () => {
+      createUserWithEmailAndPassword(auth, emailInput.value, senhaInput.value)
+        .then(() => alert("Conta criada com sucesso! Agora faça login."))
+        .catch(err => alert("Erro no cadastro: " + err.message));
     }
   </script>
 </body>
