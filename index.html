@@ -38,7 +38,6 @@
       align-items: center;
       gap: 5px;
       font-size: 1em;
-      z-index: 6;
     }
     .saldo-icon {
       width: 20px;
@@ -78,12 +77,12 @@
     }
     .multiplier {
       position: absolute;
-      top: 10px;
-      right: 15px;
-      font-size: 2.2em;
+      top: 60px;
+      left: 15px;
+      font-size: 3em;
       color: #f00;
       font-weight: bold;
-      z-index: 6;
+      z-index: 10;
     }
     .acoes, .apostas-container {
       text-align: center;
@@ -135,6 +134,7 @@
 <body>
 
   <div class="title">Plane.Money</div>
+  <div class="multiplier" id="multiplicador">1.00x</div>
 
   <div id="gameArea">
     <img src="IMG_5585.jpeg" id="aviao" />
@@ -142,7 +142,6 @@
       <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
       R$ <span id="saldo">100.00</span>
     </div>
-    <div class="multiplier" id="multiplicador">1.00x</div>
   </div>
 
   <div class="acoes">
