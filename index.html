@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AviatorBR</title>
+  <title>Plane.Money</title>
   <style>
     body {
       margin: 0;
@@ -12,12 +12,14 @@
       color: #fff;
       overflow-x: hidden;
     }
-    .title {
-      text-align: center;
-      font-size: 2.2em;
-      margin: 20px 0 10px 0;
+    .logo-nome {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      font-size: 1.8em;
       color: #f00;
       font-family: 'Orbitron', sans-serif;
+      z-index: 99;
     }
     #gameArea {
       position: relative;
@@ -25,7 +27,7 @@
       height: 300px;
       background: linear-gradient(#1e1e1e, #292929);
       overflow: hidden;
-      margin-bottom: 10px;
+      margin-top: 50px;
       border-radius: 10px;
       border: 1px solid #333;
     }
@@ -133,11 +135,13 @@
   </style>
 </head>
 <body>
-  <div class="title">AviatorBR</div>
+  <div class="logo-nome">Plane.Money</div>
+
   <div id="gameArea">
     <div id="multiplicador">1.00x</div>
     <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" />
   </div>
+
   <div class="saldo">
     <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/825/825500.png" />
     R$ <span id="saldo">100.00</span>
@@ -161,19 +165,6 @@
     <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
   </div>
 
-  <div class="apostas-container">
-    <strong>Aposta 2</strong>
-    <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
-    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.5)" />
-    <div class="valores-rapidos">
-      <button onclick="setValor('aposta2', 10)">10</button>
-      <button onclick="setValor('aposta2', 20)">20</button>
-      <button onclick="setValor('aposta2', 50)">50</button>
-      <button onclick="setValor('aposta2', 100)">100</button>
-    </div>
-    <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
-  </div>
-
   <script>
     let saldo = 100.00;
     let multiplicador = 1.00;
@@ -181,8 +172,8 @@
     let intervalo;
     let posicao = 0;
     let paradaAleatoria = 0;
-    let apostaAtiva = [null, null];
-    let autoCash = [null, null];
+    let apostaAtiva = [null];
+    let autoCash = [null];
 
     const aviao = document.getElementById("aviao");
     const gameArea = document.getElementById("gameArea");
@@ -205,14 +196,12 @@
       trail.style.top = altura + 65 + "px";
       gameArea.appendChild(trail);
 
-      [1, 2].forEach(num => {
-        if (apostaAtiva[num - 1]) {
-          const cash = autoCash[num - 1];
-          if (cash && multiplicador >= cash) {
-            encerrarAposta(num, apostaAtiva[num - 1], true);
-          }
+      if (apostaAtiva[0]) {
+        const cash = autoCash[0];
+        if (cash && multiplicador >= cash) {
+          encerrarAposta(1, apostaAtiva[0], true);
         }
-      });
+      }
 
       if (multiplicador >= paradaAleatoria) {
         encerrarRodada();
@@ -268,15 +257,13 @@
       rodando = false;
       aviao.style.transform = `translate(100vw, -200px)`;
 
-      [1, 2].forEach(num => {
-        if (apostaAtiva[num - 1]) {
-          apostaAtiva[num - 1] = null;
-          autoCash[num - 1] = null;
-          const botao = document.getElementById(`botao${num}`);
-          botao.innerText = 'Apostar';
-          botao.onclick = function () { apostar(num); };
-        }
-      });
+      if (apostaAtiva[0]) {
+        apostaAtiva[0] = null;
+        autoCash[0] = null;
+        const botao = document.getElementById(`botao1`);
+        botao.innerText = 'Apostar';
+        botao.onclick = function () { apostar(1); };
+      }
 
       setTimeout(() => {
         aviao.style.transform = `translate(0, 0)`;
