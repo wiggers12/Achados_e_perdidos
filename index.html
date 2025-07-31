@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AviatorBR</title>
+  <title>Plane.Money</title>
   <style>
     body {
       margin: 0;
@@ -12,18 +12,36 @@
       color: #fff;
       overflow-x: hidden;
     }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+    }
     .title {
-      text-align: center;
-      font-size: 2.5em;
-      margin: 20px 0;
+      font-size: 1.8em;
       color: #f00;
       font-family: 'Orbitron', sans-serif;
     }
+    .saldo {
+      background: #2c2c2c;
+      padding: 8px 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 1em;
+    }
+    .saldo-icon {
+      width: 20px;
+      height: 20px;
+    }
     .multiplier {
       text-align: center;
-      font-size: 4em;
+      font-size: 3em;
       color: #f00;
       font-weight: bold;
+      margin-bottom: 10px;
     }
     #gameArea {
       position: relative;
@@ -58,21 +76,6 @@
         transform: scale(0.5);
       }
     }
-    .saldo {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #2c2c2c;
-      padding: 10px 15px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .saldo-icon {
-      width: 20px;
-      height: 20px;
-    }
     .acoes {
       text-align: center;
       margin: 10px;
@@ -80,8 +83,8 @@
     .acoes button {
       margin: 5px;
       padding: 5px 15px;
-      background-color: #ccc;
-      color: #000;
+      background-color: #444;
+      color: #fff;
       border: none;
       border-radius: 10px;
       cursor: pointer;
@@ -121,35 +124,26 @@
       border-radius: 5px;
       border: none;
     }
-    /* Animação de queda do avião */
-    @keyframes quedaAviao {
-      0% { transform: translate(var(--posicao-x), var(--posicao-y)); }
-      100% {
-        transform: translate(calc(var(--posicao-x) + 200px), calc(var(--posicao-y) + 400px)) rotate(90deg);
-        opacity: 0;
-      }
-    }
-    .queda {
-      animation: quedaAviao 1s forwards ease-in-out;
-    }
   </style>
 </head>
 <body>
-
-  <div class="title">AviatorBR</div>
-  <div class="multiplier" id="multiplicador">1.00x</div>
-
-  <div id="gameArea">
-    <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" />
+  <div class="header">
+    <div class="title">Plane.Money</div>
     <div class="saldo">
-      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/25/25473.png" />
+      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/1170/1170576.png" />
       R$ <span id="saldo">100.00</span>
     </div>
   </div>
 
+  <div class="multiplier" id="multiplicador">1.00x</div>
+
+  <div id="gameArea">
+    <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" />
+  </div>
+
   <div class="acoes">
-    <button onclick="depositar()">Depositar</button>
-    <button onclick="sacar()">Sacar</button>
+    <button onclick="depositar()">💰 Depositar</button>
+    <button onclick="sacar()">🏦 Sacar</button>
   </div>
 
   <div class="apostas-container">
@@ -168,7 +162,7 @@
   <div class="apostas-container">
     <strong>Aposta 2</strong>
     <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
-    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.5)" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 2.5)" />
     <div class="valores-rapidos">
       <button onclick="setValor('aposta2', 10)">10</button>
       <button onclick="setValor('aposta2', 20)">20</button>
@@ -251,14 +245,13 @@
 
       const botao = document.getElementById(`botao${num}`);
       botao.innerText = 'Encerrar Aposta';
-      botao.onclick = function () { encerrarAposta(num, valor, false); };
+      botao.onclick = function () { encerrarAposta(num, valor, false, true); };
     }
 
-    function encerrarAposta(num, valor, auto = false) {
+    function encerrarAposta(num, valor, auto = false, parar = false) {
       const ganho = valor * multiplicador;
       saldo += ganho;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
-      alert((auto ? "Auto Cash-out: " : "Aposta encerrada: ") + `R$ ${ganho.toFixed(2)}`);
 
       apostaAtiva[num - 1] = null;
       autoCash[num - 1] = null;
@@ -266,27 +259,23 @@
       const botao = document.getElementById(`botao${num}`);
       botao.innerText = 'Apostar';
       botao.onclick = function () { apostar(num); };
+
+      if (parar) {
+        encerrarRodada();
+      }
     }
 
     function encerrarRodada() {
       clearInterval(intervalo);
       rodando = false;
+      aviao.style.transform = `translate(100vw, -200px)`;
 
-      const currentX = aviao.offsetLeft;
-      const currentY = aviao.offsetTop;
-      
-      aviao.style.setProperty('--posicao-x', `${currentX}px`);
-      aviao.style.setProperty('--posicao-y', `${currentY}px`);
-
-      aviao.classList.add('queda');
+      apostaAtiva.forEach((valor, idx) => {
+        if (valor) apostaAtiva[idx] = null;
+      });
 
       setTimeout(() => {
-        const trails = document.querySelectorAll('.trail');
-        trails.forEach(t => t.remove());
-
-        aviao.classList.remove('queda');
         aviao.style.transform = `translate(0, 0)`;
-
       }, 1000);
     }
 
