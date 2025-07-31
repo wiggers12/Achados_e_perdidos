@@ -25,13 +25,33 @@
       color: #f00;
       font-weight: bold;
     }
+    .voo-container {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      height: 200px;
+      margin: 0 auto 20px;
+      background: #1a1a1a;
+      border: 2px solid #f00;
+      border-radius: 10px;
+      overflow: hidden;
+    }
     .aviator-img {
       position: absolute;
-      top: 150px;
+      top: 80px;
       left: 0;
-      width: 100px;
+      width: 80px;
       height: auto;
-      transition: transform 0.5s linear;
+      transition: transform 0.3s linear;
+      z-index: 2;
+    }
+    .rastro {
+      position: absolute;
+      top: 115px;
+      left: 0;
+      height: 5px;
+      background: red;
+      z-index: 1;
     }
     .saldo {
       text-align: center;
@@ -87,7 +107,10 @@
 <body>
   <div class="title">AviatorBR</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
-  <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" class="aviator-img" alt="Avião" />
+  <div class="voo-container">
+    <div class="rastro" id="rastro" style="width: 0;"></div>
+    <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" class="aviator-img" alt="Avião" />
+  </div>
   <div class="saldo">Saldo: R$ <span id="saldo">100.00</span></div>
   <div class="depositar" onclick="depositar()">Depositar</div>
   <div class="resultados">
@@ -95,7 +118,7 @@
     <div id="ultimos"></div>
   </div>
 
-  <!-- Bloco de Apostas 1 -->
+  <!-- Aposta 1 -->
   <div class="apostas-container">
     <strong>Aposta 1</strong>
     <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
@@ -109,7 +132,7 @@
     <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
   </div>
 
-  <!-- Bloco de Apostas 2 -->
+  <!-- Aposta 2 -->
   <div class="apostas-container">
     <strong>Aposta 2</strong>
     <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
@@ -129,6 +152,7 @@
     let rodando = false;
     let intervalo;
     let posicao = 0;
+    let limiteAleatorio = 0;
 
     function atualizarMultiplicador() {
       if (!rodando) return;
@@ -136,15 +160,22 @@
       document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
       posicao += 5;
       document.getElementById("aviao").style.transform = `translateX(${posicao}px)`;
+      document.getElementById("rastro").style.width = `${posicao + 50}px`;
+
+      if (multiplicador >= limiteAleatorio) {
+        pararRodada();
+      }
     }
 
     function iniciarRodada() {
       multiplicador = 1.00;
       posicao = 0;
+      limiteAleatorio = 1.5 + Math.random() * 4;
       document.getElementById("aviao").style.transform = `translateX(0)`;
+      document.getElementById("rastro").style.width = "0";
       rodando = true;
       document.getElementById('multiplicador').innerText = '1.00x';
-      intervalo = setInterval(atualizarMultiplicador, 200);
+      intervalo = setInterval(atualizarMultiplicador, 150);
     }
 
     function apostar(num) {
@@ -162,14 +193,19 @@
     }
 
     function encerrarAposta(num, valor) {
+      if (!rodando) return;
       clearInterval(intervalo);
       rodando = false;
-      multiplicador += Math.random() * 3;
       const ganho = valor * multiplicador;
       saldo += ganho;
       document.getElementById('saldo').innerText = saldo.toFixed(2);
       document.getElementById(`botao${num}`).innerText = 'Apostar';
       document.getElementById(`botao${num}`).onclick = function () { apostar(num); };
+    }
+
+    function pararRodada() {
+      clearInterval(intervalo);
+      rodando = false;
       document.getElementById("aviao").style.transform = `translateX(100vw)`;
     }
 
