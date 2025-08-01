@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carteira Plane.Money</title>
+  <title>Plane.Money</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
       padding: 0;
@@ -13,89 +16,80 @@
       color: #fff;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: flex-start;
+      align-items: center;
       min-height: 100vh;
     }
     .container {
-      margin-top: 40px;
+      margin-top: 60px;
       text-align: center;
-      padding: 0 20px;
       width: 100%;
       max-width: 400px;
+      padding: 0 20px;
     }
     h2 {
+      margin-top: 0;
       font-size: 1.8em;
-      margin-bottom: 10px;
     }
-    .warning {
-      color: #ffcc00;
-      margin-bottom: 20px;
-      font-size: 0.95em;
-    }
-    .botoes {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
+    input {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
     }
     button {
-      padding: 10px 15px;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
       font-size: 1em;
       border: none;
       border-radius: 5px;
+      background-color: #00cc00;
+      color: white;
       cursor: pointer;
     }
-    .depositar {
-      background-color: #00cc00;
-      color: white;
-    }
-    .sacar {
-      background-color: #00cc00;
-      color: white;
-    }
-    .saldo {
-      font-size: 1.2em;
-      font-weight: bold;
-      margin-top: 10px;
+    .info {
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>Carteira Plane.Money</h2>
-    <p class="warning">
-      ⚠️ Simulação de saldo, Firebase Firestore não implementado ainda
-    </p>
-    <div class="botoes">
-      <button class="depositar" onclick="depositar()">Depositar R$50</button>
-      <button class="sacar" onclick="sacar()">Sacar R$50</button>
-    </div>
-    <p class="saldo" id="saldo">Saldo: R$100,00</p>
+    <h2>Plane.Money</h2>
+    <p>Login / Cadastro</p>
+    <input type="email" id="email" placeholder="E-mail">
+    <input type="password" id="senha" placeholder="Senha">
+    <button onclick="login()">Entrar</button>
+    <button onclick="cadastrar()">Cadastrar</button>
+    <p class="info">Informe seus dados para acessar a plataforma.</p>
   </div>
+  <script type="module">
+    import { auth } from './firebase.js';
+    import {
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword
+    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-  <script>
-    let saldo = 100;
+    window.login = () => {
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+      signInWithEmailAndPassword(auth, email, senha)
+        .then(() => location.href = "index.html")
+        .catch(error => alert("Erro: " + error.message));
+    };
 
-    function atualizarSaldo() {
-      document.getElementById("saldo").innerText = `Saldo: R$${saldo.toFixed(2).replace('.', ',')}`;
-    }
-
-    function depositar() {
-      saldo += 50;
-      atualizarSaldo();
-    }
-
-    function sacar() {
-      if (saldo >= 50) {
-        saldo -= 50;
-        atualizarSaldo();
-      } else {
-        alert("Saldo insuficiente!");
-      }
-    }
-
-    atualizarSaldo();
+    window.cadastrar = () => {
+      const email = document.getElementById("email").value;
+      const senha = document.getElementById("senha").value;
+      createUserWithEmailAndPassword(auth, email, senha)
+        .then(() => location.href = "index.html")
+        .catch(error => alert("Erro: " + error.message));
+    };
   </script>
 </body>
 </html>
