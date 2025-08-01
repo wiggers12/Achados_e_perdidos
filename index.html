@@ -7,63 +7,57 @@
   <script type="module">
     import { auth, db } from './firebase.js';
     import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { doc, getDoc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+    import { doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
+    let userUID = null;
     let modoAtual = 'real';
     let saldoReal = 0;
-    let saldoDemo = 1000;
-    let userId = null;
+    let saldoDemo = 0;
 
-    const saldoSpan = document.getElementById("saldo");
-    const btnReal = document.getElementById("btnReal");
-    const btnDemo = document.getElementById("btnDemo");
-
-    onAuthStateChanged(auth, async user => {
-      if (!user) return location.href = "auth.html";
-      userId = user.uid;
-
-      const ref = doc(db, "usuarios", userId);
-      const snap = await getDoc(ref);
-
-      if (!snap.exists()) {
-        await setDoc(ref, {
-          saldoReal: 0,
-          saldoDemo: 1000
-        });
-      }
-
-      const data = (await getDoc(ref)).data();
-      saldoReal = data.saldoReal || 0;
-      saldoDemo = data.saldoDemo || 1000;
-      atualizarSaldo();
-    });
-
-    window.mudarModo = function(modo) {
-      modoAtual = modo;
-      btnReal.className = modo === 'real' ? 'ativo' : 'inativo';
-      btnDemo.className = modo === 'demo' ? 'ativo' : 'inativo';
-      atualizarSaldo();
-    };
-
-    function atualizarSaldo() {
-      saldoSpan.innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
+    function atualizarUI() {
+      document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
+      document.getElementById("btnReal").className = modoAtual === 'real' ? "ativo" : "inativo";
+      document.getElementById("btnDemo").className = modoAtual === 'demo' ? "ativo" : "inativo";
     }
 
-    window.getSaldoAtual = () => modoAtual === 'real' ? saldoReal : saldoDemo;
-
-    window.alterarSaldo = async function(valor) {
-      const ref = doc(db, "usuarios", userId);
-      if (modoAtual === 'real') {
-        saldoReal += valor;
-        await updateDoc(ref, { saldoReal });
-      } else {
-        saldoDemo += valor;
-        await updateDoc(ref, { saldoDemo });
-      }
-      atualizarSaldo();
+    window.mudarModo = function(novoModo) {
+      modoAtual = novoModo;
+      atualizarUI();
     };
 
     window.logout = () => signOut(auth).then(() => location.href = "auth.html");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return location.href = "auth.html";
+      userUID = user.uid;
+
+      const ref = doc(db, "usuarios", userUID);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        saldoReal = data.saldoReal || 0;
+        saldoDemo = data.saldoDemo || 0;
+        atualizarUI();
+      } else {
+        await setDoc(ref, { saldoReal: 100, saldoDemo: 100 });
+        saldoReal = 100;
+        saldoDemo = 100;
+        atualizarUI();
+      }
+    });
+
+    window.getSaldoAtual = () => (modoAtual === 'real' ? saldoReal : saldoDemo);
+    window.setSaldoAtual = async (novoSaldo) => {
+      const ref = doc(db, "usuarios", userUID);
+      if (modoAtual === 'real') {
+        saldoReal = novoSaldo;
+        await updateDoc(ref, { saldoReal });
+      } else {
+        saldoDemo = novoSaldo;
+        await updateDoc(ref, { saldoDemo });
+      }
+      atualizarUI();
+    };
   </script>
   <style>
     body {
@@ -208,7 +202,6 @@
   </style>
 </head>
 <body>
-
   <div class="title">Plane.Money</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
 
@@ -218,11 +211,10 @@
       <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
       R$ <span id="saldo">0.00</span>
     </div>
-  </div>
-
-  <div class="modo">
-    <button id="btnReal" class="ativo" onclick="mudarModo('real')">Conta Real</button>
-    <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
+    <div class="modo">
+      <button id="btnReal" class="ativo" onclick="mudarModo('real')">Conta Real</button>
+      <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
+    </div>
   </div>
 
   <div class="acoes">
@@ -313,33 +305,33 @@
       intervalo = setInterval(atualizarMultiplicador, 100);
     }
 
-    function apostar(num) {
+    async function apostar(num) {
       const valor = parseFloat(document.getElementById(`aposta${num}`).value);
       const cash = parseFloat(document.getElementById(`auto${num}`).value);
-
-      const saldoAtual = parseFloat(document.getElementById('saldo').innerText);
+      const saldoAtual = await getSaldoAtual();
 
       if (valor > saldoAtual || isNaN(valor) || valor <= 0) {
         alert('Aposta inválida');
         return;
       }
 
-      window.alterarSaldo(-valor);
+      await setSaldoAtual(saldoAtual - valor);
       apostaAtiva[num - 1] = valor;
       autoCash[num - 1] = cash;
+
+      if (!rodando) iniciarRodada();
 
       const botao = document.getElementById(`botao${num}`);
       botao.innerText = 'Encerrar Aposta';
       botao.onclick = function () { encerrarAposta(num, valor, false); };
-
-      if (!rodando) iniciarRodada();
     }
 
-    function encerrarAposta(num, valor, auto = false) {
+    async function encerrarAposta(num, valor, auto = false) {
       if (!rodando) return;
 
       const ganho = valor * multiplicador;
-      window.alterarSaldo(ganho);
+      const saldoAtual = await getSaldoAtual();
+      await setSaldoAtual(saldoAtual + ganho);
       alert((auto ? "Auto Cash-out: " : "Aposta encerrada: ") + `R$ ${ganho.toFixed(2)}`);
 
       apostaAtiva[num - 1] = null;
@@ -376,7 +368,7 @@
     }
 
     function depositar() {
-      window.alterarSaldo(50);
+      getSaldoAtual().then(s => setSaldoAtual(s + 50));
     }
 
     function sacar() {
