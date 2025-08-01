@@ -12,7 +12,7 @@
     let userUID = null;
     let modoAtual = 'real';
     let saldoReal = 0;
-    let saldoDemo = 0;
+    let saldoDemo = 100;
 
     function atualizarUI() {
       document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
