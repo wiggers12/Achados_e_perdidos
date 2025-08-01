@@ -75,7 +75,7 @@
       color: red;
       font-weight: bold;
     }
-    .saldo {
+    .top-bar {
       position: absolute;
       top: 10px;
       right: 10px;
@@ -87,24 +87,21 @@
       border-radius: 10px;
       z-index: 10;
     }
-    .modo {
-      display: flex;
-      gap: 5px;
-      margin-left: 10px;
-    }
-    .modo button {
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
     .ativo {
       background-color: green;
       color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
     }
     .inativo {
       background-color: gray;
       color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
     }
     .saldo-icon {
       width: 20px;
@@ -204,15 +201,48 @@
 
   <div id="gameArea">
     <img src="IMG_5585.jpeg" id="aviao" />
-    <div class="saldo">
+    <div class="top-bar">
       <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
-      R$ <span id="saldo">0.00</span>
-      <div class="modo">
-        <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
-        <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
-      </div>
+      <strong>R$ <span id="saldo">0.00</span></strong>
+      <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
+      <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
     </div>
   </div>
 
   <div class="acoes">
-    <button onclick="depositar()">
+    <button onclick="depositar()">💰 Depositar</button>
+    <button onclick="sacar()">🏦 Sacar</button>
+    <button onclick="window.location.href='wallet.html'">Carteira</button>
+  </div>
+
+  <div class="apostas-container">
+    <strong>Aposta 1</strong>
+    <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto1" type="number" placeholder="Auto cash-out (ex: 2.0)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta1', 10)">10</button>
+      <button onclick="setValor('aposta1', 20)">20</button>
+      <button onclick="setValor('aposta1', 50)">50</button>
+      <button onclick="setValor('aposta1', 100)">100</button>
+    </div>
+    <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
+  </div>
+
+  <div class="apostas-container">
+    <strong>Aposta 2</strong>
+    <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.0)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta2', 10)">10</button>
+      <button onclick="setValor('aposta2', 20)">20</button>
+      <button onclick="setValor('aposta2', 50)">50</button>
+      <button onclick="setValor('aposta2', 100)">100</button>
+    </div>
+    <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
+  </div>
+
+  <button class="logout" onclick="logout()">Sair</button>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
