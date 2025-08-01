@@ -75,18 +75,27 @@
       color: red;
       font-weight: bold;
     }
-    .saldo, .modo {
+    #top-bar {
       position: absolute;
       top: 10px;
       right: 10px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-end;
       gap: 10px;
+      z-index: 20;
     }
     .saldo {
       background: #2c2c2c;
       padding: 10px 15px;
       border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modo {
+      display: flex;
+      gap: 10px;
     }
     .modo button {
       padding: 5px 10px;
@@ -200,13 +209,15 @@
 
   <div id="gameArea">
     <img src="IMG_5585.jpeg" id="aviao" />
-    <div class="saldo">
-      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
-      R$ <span id="saldo">0.00</span>
-    </div>
-    <div class="modo">
-      <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
-      <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
+    <div id="top-bar">
+      <div class="saldo">
+        <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
+        R$ <span id="saldo">0.00</span>
+      </div>
+      <div class="modo">
+        <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
+        <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
+      </div>
     </div>
   </div>
 
