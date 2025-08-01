@@ -75,43 +75,36 @@
       color: red;
       font-weight: bold;
     }
-    .saldo {
+    .saldo, .modo {
       position: absolute;
       top: 10px;
       right: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .saldo {
       background: #2c2c2c;
       padding: 10px 15px;
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 1em;
+    }
+    .modo button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .ativo {
+      background-color: green;
+      color: white;
+    }
+    .inativo {
+      background-color: gray;
+      color: white;
     }
     .saldo-icon {
       width: 20px;
       height: 20px;
-    }
-    .modo {
-      position: absolute;
-      top: 60px;
-      right: 10px;
-      display: flex;
-      gap: 10px;
-    }
-    .modo button {
-      padding: 5px 10px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .ativo {
-      background: #00cc00;
-      color: #fff;
-    }
-    .inativo {
-      background: #444;
-      color: #ccc;
     }
     #gameArea {
       position: relative;
@@ -212,7 +205,7 @@
       R$ <span id="saldo">0.00</span>
     </div>
     <div class="modo">
-      <button id="btnReal" class="ativo" onclick="mudarModo('real')">Conta Real</button>
+      <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
       <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
     </div>
   </div>
@@ -251,129 +244,6 @@
 
   <button class="logout" onclick="logout()">Sair</button>
 
-  <script>
-    let multiplicador = 1.00;
-    let rodando = false;
-    let intervalo;
-    let posicao = 0;
-    let paradaAleatoria = 0;
-    let apostaAtiva = [null, null];
-    let autoCash = [null, null];
-
-    const aviao = document.getElementById("aviao");
-    const gameArea = document.getElementById("gameArea");
-
-    function atualizarMultiplicador() {
-      if (!rodando) return;
-
-      multiplicador += 0.05;
-      document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
-
-      posicao += multiplicador * 1.2;
-      let altura = 200 - posicao * 0.25;
-      if (altura < 50) altura = 50;
-
-      aviao.style.transform = `translate(${posicao}px, ${-1 * (200 - altura)}px)`;
-
-      const trail = document.createElement("div");
-      trail.className = "trail";
-      trail.style.left = aviao.offsetLeft + 50 + "px";
-      trail.style.top = altura + 65 + "px";
-      gameArea.appendChild(trail);
-
-      [1, 2].forEach(num => {
-        if (apostaAtiva[num - 1]) {
-          const cash = autoCash[num - 1];
-          if (cash && multiplicador >= cash) {
-            encerrarAposta(num, apostaAtiva[num - 1], true);
-          }
-        }
-      });
-
-      if (multiplicador >= paradaAleatoria) {
-        encerrarRodada();
-      }
-    }
-
-    function iniciarRodada() {
-      multiplicador = 1.00;
-      posicao = 0;
-      paradaAleatoria = Math.random() * 3 + 2.5;
-      aviao.style.transform = "translate(0, 0)";
-      rodando = true;
-      document.getElementById('multiplicador').innerText = '1.00x';
-      intervalo = setInterval(atualizarMultiplicador, 100);
-    }
-
-    async function apostar(num) {
-      const valor = parseFloat(document.getElementById(`aposta${num}`).value);
-      const cash = parseFloat(document.getElementById(`auto${num}`).value);
-      const saldoAtual = await getSaldoAtual();
-
-      if (valor > saldoAtual || isNaN(valor) || valor <= 0) {
-        alert('Aposta inválida');
-        return;
-      }
-
-      await setSaldoAtual(saldoAtual - valor);
-      apostaAtiva[num - 1] = valor;
-      autoCash[num - 1] = cash;
-
-      if (!rodando) iniciarRodada();
-
-      const botao = document.getElementById(`botao${num}`);
-      botao.innerText = 'Encerrar Aposta';
-      botao.onclick = function () { encerrarAposta(num, valor, false); };
-    }
-
-    async function encerrarAposta(num, valor, auto = false) {
-      if (!rodando) return;
-
-      const ganho = valor * multiplicador;
-      const saldoAtual = await getSaldoAtual();
-      await setSaldoAtual(saldoAtual + ganho);
-      alert((auto ? "Auto Cash-out: " : "Aposta encerrada: ") + `R$ ${ganho.toFixed(2)}`);
-
-      apostaAtiva[num - 1] = null;
-      autoCash[num - 1] = null;
-
-      const botao = document.getElementById(`botao${num}`);
-      botao.innerText = 'Apostar';
-      botao.onclick = function () { apostar(num); };
-    }
-
-    function encerrarRodada() {
-      clearInterval(intervalo);
-      rodando = false;
-      aviao.style.transform = `translate(100vw, -200px)`;
-
-      [1, 2].forEach(num => {
-        if (apostaAtiva[num - 1]) {
-          alert(`Aposta ${num} perdida`);
-          apostaAtiva[num - 1] = null;
-          autoCash[num - 1] = null;
-          const botao = document.getElementById(`botao${num}`);
-          botao.innerText = 'Apostar';
-          botao.onclick = function () { apostar(num); };
-        }
-      });
-
-      setTimeout(() => {
-        aviao.style.transform = `translate(0, 0)`;
-      }, 1000);
-    }
-
-    function setValor(id, val) {
-      document.getElementById(id).value = val;
-    }
-
-    function depositar() {
-      getSaldoAtual().then(s => setSaldoAtual(s + 50));
-    }
-
-    function sacar() {
-      alert("Saque solicitado com sucesso! (simulação)");
-    }
-  </script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
