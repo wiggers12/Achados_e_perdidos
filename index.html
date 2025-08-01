@@ -36,7 +36,7 @@
       if (snap.exists()) {
         const data = snap.data();
         saldoReal = data.saldoReal || 0;
-        saldoDemo = data.saldoDemo || 0;
+        saldoDemo = data.saldoDemo || 100;
         atualizarUI();
       } else {
         await setDoc(ref, { saldoReal: 100, saldoDemo: 100 });
