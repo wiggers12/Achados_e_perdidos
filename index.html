@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Plane.Money</title>
+
   <script type="module">
     import { auth, db } from './firebase.js';
     import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -12,7 +13,7 @@
     let userUID = null;
     let modoAtual = 'real';
     let saldoReal = 0;
-    let saldoDemo = 100;
+    let saldoDemo = 0;
 
     function atualizarUI() {
       document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
@@ -36,7 +37,7 @@
       if (snap.exists()) {
         const data = snap.data();
         saldoReal = data.saldoReal || 0;
-        saldoDemo = data.saldoDemo || 100;
+        saldoDemo = data.saldoDemo || 0;
         atualizarUI();
       } else {
         await setDoc(ref, { saldoReal: 100, saldoDemo: 100 });
@@ -59,6 +60,7 @@
       atualizarUI();
     };
   </script>
+
   <style>
     body {
       margin: 0;
@@ -67,6 +69,7 @@
       color: #fff;
       overflow-x: hidden;
     }
+
     .title {
       position: absolute;
       top: 10px;
@@ -75,46 +78,7 @@
       color: red;
       font-weight: bold;
     }
-    #top-bar {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 10px;
-      z-index: 20;
-    }
-    .saldo {
-      background: #2c2c2c;
-      padding: 10px 15px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .modo {
-      display: flex;
-      gap: 10px;
-    }
-    .modo button {
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .ativo {
-      background-color: green;
-      color: white;
-    }
-    .inativo {
-      background-color: gray;
-      color: white;
-    }
-    .saldo-icon {
-      width: 20px;
-      height: 20px;
-    }
+
     #gameArea {
       position: relative;
       width: 100%;
@@ -123,6 +87,7 @@
       overflow: hidden;
       margin-bottom: 10px;
     }
+
     #aviao {
       position: absolute;
       top: 200px;
@@ -131,22 +96,7 @@
       height: auto;
       z-index: 5;
     }
-    .trail {
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background: red;
-      border-radius: 50%;
-      opacity: 0.7;
-      animation: fadeOut 1s linear forwards;
-      z-index: 1;
-    }
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        transform: scale(0.5);
-      }
-    }
+
     .multiplier {
       position: absolute;
       top: 60px;
@@ -156,10 +106,55 @@
       font-weight: bold;
       z-index: 10;
     }
+
+    .saldo-modo-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .saldo {
+      display: flex;
+      align-items: center;
+      background: #2c2c2c;
+      padding: 10px 15px;
+      border-radius: 10px;
+    }
+
+    .saldo-icon {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+    }
+
+    .modo button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    .ativo {
+      background-color: green;
+      color: white;
+    }
+
+    .inativo {
+      background-color: gray;
+      color: white;
+    }
+
     .acoes, .apostas-container {
       text-align: center;
       margin: 10px;
     }
+
     .acoes button, .logout {
       margin: 5px;
       padding: 5px 15px;
@@ -169,11 +164,13 @@
       border-radius: 10px;
       cursor: pointer;
     }
+
     .logout {
       position: absolute;
       bottom: 10px;
       right: 10px;
     }
+
     .botao-verde {
       background-color: #00cc00;
       color: white;
@@ -184,6 +181,7 @@
       cursor: pointer;
       width: 100%;
     }
+
     .input-aposta {
       width: calc(100% - 10px);
       padding: 10px;
@@ -192,6 +190,7 @@
       border-radius: 5px;
       border: none;
     }
+
     .valores-rapidos button {
       margin: 5px;
       padding: 5px 10px;
@@ -201,15 +200,35 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
+    @media(max-width: 600px) {
+      .title {
+        font-size: 1.5em;
+      }
+
+      .modo button {
+        font-size: 0.8em;
+        padding: 4px 8px;
+      }
+
+      .multiplier {
+        font-size: 2em;
+      }
+
+      .input-aposta, .botao-verde {
+        font-size: 1em;
+      }
+    }
   </style>
 </head>
+
 <body>
   <div class="title">Plane.Money</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
 
   <div id="gameArea">
     <img src="IMG_5585.jpeg" id="aviao" />
-    <div id="top-bar">
+    <div class="saldo-modo-container">
       <div class="saldo">
         <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
         R$ <span id="saldo">0.00</span>
@@ -276,7 +295,6 @@
       }
 
       setSaldoAtual(saldoAtual - valorAposta);
-
       alert(`Aposta ${numero} de R$ ${valorAposta.toFixed(2)} realizada com cash-out ${autoCash || "manual"}`);
     };
   </script>
