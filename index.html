@@ -3,7 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AviatorBR</title>
+  <title>Plane.Money</title>
+  <script type="module">
+    import { auth, db } from './firebase.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { doc, getDoc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    let modoAtual = 'real';
+    let saldoReal = 0;
+    let saldoDemo = 1000;
+    let userId = null;
+
+    const saldoSpan = document.getElementById("saldo");
+    const btnReal = document.getElementById("btnReal");
+    const btnDemo = document.getElementById("btnDemo");
+
+    onAuthStateChanged(auth, async user => {
+      if (!user) return location.href = "auth.html";
+      userId = user.uid;
+
+      const ref = doc(db, "usuarios", userId);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        await setDoc(ref, {
+          saldoReal: 0,
+          saldoDemo: 1000
+        });
+      }
+
+      const data = (await getDoc(ref)).data();
+      saldoReal = data.saldoReal || 0;
+      saldoDemo = data.saldoDemo || 1000;
+      atualizarSaldo();
+    });
+
+    window.mudarModo = function(modo) {
+      modoAtual = modo;
+      btnReal.className = modo === 'real' ? 'ativo' : 'inativo';
+      btnDemo.className = modo === 'demo' ? 'ativo' : 'inativo';
+      atualizarSaldo();
+    };
+
+    function atualizarSaldo() {
+      saldoSpan.innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
+    }
+
+    window.getSaldoAtual = () => modoAtual === 'real' ? saldoReal : saldoDemo;
+
+    window.alterarSaldo = async function(valor) {
+      const ref = doc(db, "usuarios", userId);
+      if (modoAtual === 'real') {
+        saldoReal += valor;
+        await updateDoc(ref, { saldoReal });
+      } else {
+        saldoDemo += valor;
+        await updateDoc(ref, { saldoDemo });
+      }
+      atualizarSaldo();
+    };
+
+    window.logout = () => signOut(auth).then(() => location.href = "auth.html");
+  </script>
   <style>
     body {
       margin: 0;
@@ -13,53 +74,109 @@
       overflow-x: hidden;
     }
     .title {
-      text-align: center;
-      font-size: 2.5em;
-      margin: 20px 0 5px;
-      color: #f00;
-      font-family: 'Orbitron', sans-serif;
-    }
-    .modo-atual {
-      text-align: center;
-      font-size: 1em;
-      margin-bottom: 10px;
-      color: #0f0;
-    }
-    .multiplier {
-      text-align: center;
-      font-size: 4em;
-      color: #f00;
+      position: absolute;
+      top: 10px;
+      left: 15px;
+      font-size: 2em;
+      color: red;
       font-weight: bold;
     }
-    .aviator-img {
+    .saldo {
       position: absolute;
-      top: 150px;
+      top: 10px;
+      right: 10px;
+      background: #2c2c2c;
+      padding: 10px 15px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 1em;
+    }
+    .saldo-icon {
+      width: 20px;
+      height: 20px;
+    }
+    .modo {
+      position: absolute;
+      top: 60px;
+      right: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .modo button {
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .ativo {
+      background: #00cc00;
+      color: #fff;
+    }
+    .inativo {
+      background: #444;
+      color: #ccc;
+    }
+    #gameArea {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: #1e1e1e;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    #aviao {
+      position: absolute;
+      top: 200px;
       left: 0;
       width: 100px;
       height: auto;
-      transition: transform 0.5s linear;
+      z-index: 5;
     }
-    .saldo {
-      text-align: center;
-      font-size: 1.2em;
+    .trail {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: red;
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: fadeOut 1s linear forwards;
+      z-index: 1;
     }
-    .depositar {
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+    }
+    .multiplier {
+      position: absolute;
+      top: 60px;
+      left: 15px;
+      font-size: 3em;
+      color: #f00;
+      font-weight: bold;
+      z-index: 10;
+    }
+    .acoes, .apostas-container {
       text-align: center;
+      margin: 10px;
+    }
+    .acoes button, .logout {
+      margin: 5px;
+      padding: 5px 15px;
       background-color: #ccc;
       color: #000;
-      padding: 5px 10px;
+      border: none;
       border-radius: 10px;
-      margin: 10px auto;
-      width: fit-content;
       cursor: pointer;
     }
-    .resultados, .apostas-container {
-      background-color: #222;
-      padding: 15px;
-      margin: 10px auto;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 400px;
+    .logout {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
     }
     .botao-verde {
       background-color: #00cc00;
@@ -71,6 +188,14 @@
       cursor: pointer;
       width: 100%;
     }
+    .input-aposta {
+      width: calc(100% - 10px);
+      padding: 10px;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+    }
     .valores-rapidos button {
       margin: 5px;
       padding: 5px 10px;
@@ -80,122 +205,182 @@
       border-radius: 5px;
       cursor: pointer;
     }
-    .input-aposta {
-      width: calc(100% - 10px);
-      padding: 10px;
-      font-size: 1.2em;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    .escolher-modo {
-      text-align: center;
-      margin: 20px auto;
-    }
-    .modo-btn {
-      background-color: #333;
-      color: #fff;
-      border: 2px solid #fff;
-      margin: 5px;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 1em;
-    }
   </style>
 </head>
 <body>
-  <div class="title">AviatorBR</div>
-  <div class="modo-atual" id="modoAtual">Modo Atual: ...</div>
-  <div class="multiplier" id="multiplicador">1.00x</div>
-  <img src="https://wiggers12.github.io/Doce-sabor/IMG_5585.jpeg" id="aviao" class="aviator-img" alt="Avião" />
-  <div class="saldo">Saldo: R$ <span id="saldo">0.00</span></div>
-  <div class="depositar" onclick="depositar()">Depositar</div>
 
-  <div class="escolher-modo">
-    <button class="modo-btn" onclick="setarModo('demo')">Entrar no Modo Demo</button>
-    <button class="modo-btn" onclick="setarModo('real')">Entrar no Modo Real</button>
+  <div class="title">Plane.Money</div>
+  <div class="multiplier" id="multiplicador">1.00x</div>
+
+  <div id="gameArea">
+    <img src="IMG_5585.jpeg" id="aviao" />
+    <div class="saldo">
+      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
+      R$ <span id="saldo">0.00</span>
+    </div>
   </div>
 
-  <!-- Bloco de Apostas 1 -->
+  <div class="modo">
+    <button id="btnReal" class="ativo" onclick="mudarModo('real')">Conta Real</button>
+    <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
+  </div>
+
+  <div class="acoes">
+    <button onclick="depositar()">💰 Depositar</button>
+    <button onclick="sacar()">🏦 Sacar</button>
+    <button onclick="window.location.href='wallet.html'">Carteira</button>
+  </div>
+
   <div class="apostas-container">
     <strong>Aposta 1</strong>
     <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto1" type="number" placeholder="Auto cash-out (ex: 2.0)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta1', 10)">10</button>
+      <button onclick="setValor('aposta1', 20)">20</button>
+      <button onclick="setValor('aposta1', 50)">50</button>
+      <button onclick="setValor('aposta1', 100)">100</button>
+    </div>
     <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <div class="apostas-container">
+    <strong>Aposta 2</strong>
+    <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.0)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta2', 10)">10</button>
+      <button onclick="setValor('aposta2', 20)">20</button>
+      <button onclick="setValor('aposta2', 50)">50</button>
+      <button onclick="setValor('aposta2', 100)">100</button>
+    </div>
+    <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
+  </div>
+
+  <button class="logout" onclick="logout()">Sair</button>
+
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
-      authDomain: "doce-sabor-caseiro.firebaseapp.com",
-      projectId: "doce-sabor-caseiro",
-      storageBucket: "doce-sabor-caseiro.appspot.com",
-      messagingSenderId: "414062499771",
-      appId: "1:414062499771:web:1a811377bc6bbf145f969e",
-      measurementId: "G-KMC0FC7Z4H"
-    };
+    let multiplicador = 1.00;
+    let rodando = false;
+    let intervalo;
+    let posicao = 0;
+    let paradaAleatoria = 0;
+    let apostaAtiva = [null, null];
+    let autoCash = [null, null];
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    const aviao = document.getElementById("aviao");
+    const gameArea = document.getElementById("gameArea");
 
-    let userUID = null;
-    let modoAtual = null;
+    function atualizarMultiplicador() {
+      if (!rodando) return;
 
-    auth.onAuthStateChanged(async user => {
-      if (user) {
-        userUID = user.uid;
-        const ref = db.collection("usuarios").doc(userUID);
-        const snap = await ref.get();
+      multiplicador += 0.05;
+      document.getElementById('multiplicador').innerText = multiplicador.toFixed(2) + 'x';
 
-        if (!snap.exists) {
-          await ref.set({ modo: "demo", saldo_demo: 150.0, saldo_real: 0.0 });
+      posicao += multiplicador * 1.2;
+      let altura = 200 - posicao * 0.25;
+      if (altura < 50) altura = 50;
+
+      aviao.style.transform = `translate(${posicao}px, ${-1 * (200 - altura)}px)`;
+
+      const trail = document.createElement("div");
+      trail.className = "trail";
+      trail.style.left = aviao.offsetLeft + 50 + "px";
+      trail.style.top = altura + 65 + "px";
+      gameArea.appendChild(trail);
+
+      [1, 2].forEach(num => {
+        if (apostaAtiva[num - 1]) {
+          const cash = autoCash[num - 1];
+          if (cash && multiplicador >= cash) {
+            encerrarAposta(num, apostaAtiva[num - 1], true);
+          }
         }
-      } else {
-        alert("Você precisa estar logado.");
-        window.location.href = "auth.html";
+      });
+
+      if (multiplicador >= paradaAleatoria) {
+        encerrarRodada();
       }
-    });
-
-    async function setarModo(modo) {
-      modoAtual = modo;
-      document.getElementById("modoAtual").innerText = "Modo Atual: " + modo.toUpperCase();
-      const ref = db.collection("usuarios").doc(userUID);
-      await ref.update({ modo });
-      const snap = await ref.get();
-      const dados = snap.data();
-      const saldo = modo === "demo" ? dados.saldo_demo : dados.saldo_real;
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
     }
 
-    async function depositar() {
-      const valor = 50;
-      const ref = db.collection("usuarios").doc(userUID);
-      const snap = await ref.get();
-      let saldo = modoAtual === "demo" ? snap.data().saldo_demo : snap.data().saldo_real;
-      saldo += valor;
-      const campo = modoAtual === "demo" ? { saldo_demo: saldo } : { saldo_real: saldo };
-      await ref.update(campo);
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
+    function iniciarRodada() {
+      multiplicador = 1.00;
+      posicao = 0;
+      paradaAleatoria = Math.random() * 3 + 2.5;
+      aviao.style.transform = "translate(0, 0)";
+      rodando = true;
+      document.getElementById('multiplicador').innerText = '1.00x';
+      intervalo = setInterval(atualizarMultiplicador, 100);
     }
 
-    async function apostar(num) {
+    function apostar(num) {
       const valor = parseFloat(document.getElementById(`aposta${num}`).value);
-      if (isNaN(valor) || valor <= 0) return alert("Valor inválido");
+      const cash = parseFloat(document.getElementById(`auto${num}`).value);
 
-      const ref = db.collection("usuarios").doc(userUID);
-      const snap = await ref.get();
-      let saldo = modoAtual === "demo" ? snap.data().saldo_demo : snap.data().saldo_real;
-      if (valor > saldo) return alert("Saldo insuficiente");
+      const saldoAtual = parseFloat(document.getElementById('saldo').innerText);
 
-      saldo -= valor;
-      const campo = modoAtual === "demo" ? { saldo_demo: saldo } : { saldo_real: saldo };
-      await ref.update(campo);
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
-      alert(`Aposta de R$ ${valor.toFixed(2)} realizada no modo ${modoAtual}`);
+      if (valor > saldoAtual || isNaN(valor) || valor <= 0) {
+        alert('Aposta inválida');
+        return;
+      }
+
+      window.alterarSaldo(-valor);
+      apostaAtiva[num - 1] = valor;
+      autoCash[num - 1] = cash;
+
+      const botao = document.getElementById(`botao${num}`);
+      botao.innerText = 'Encerrar Aposta';
+      botao.onclick = function () { encerrarAposta(num, valor, false); };
+
+      if (!rodando) iniciarRodada();
+    }
+
+    function encerrarAposta(num, valor, auto = false) {
+      if (!rodando) return;
+
+      const ganho = valor * multiplicador;
+      window.alterarSaldo(ganho);
+      alert((auto ? "Auto Cash-out: " : "Aposta encerrada: ") + `R$ ${ganho.toFixed(2)}`);
+
+      apostaAtiva[num - 1] = null;
+      autoCash[num - 1] = null;
+
+      const botao = document.getElementById(`botao${num}`);
+      botao.innerText = 'Apostar';
+      botao.onclick = function () { apostar(num); };
+    }
+
+    function encerrarRodada() {
+      clearInterval(intervalo);
+      rodando = false;
+      aviao.style.transform = `translate(100vw, -200px)`;
+
+      [1, 2].forEach(num => {
+        if (apostaAtiva[num - 1]) {
+          alert(`Aposta ${num} perdida`);
+          apostaAtiva[num - 1] = null;
+          autoCash[num - 1] = null;
+          const botao = document.getElementById(`botao${num}`);
+          botao.innerText = 'Apostar';
+          botao.onclick = function () { apostar(num); };
+        }
+      });
+
+      setTimeout(() => {
+        aviao.style.transform = `translate(0, 0)`;
+      }, 1000);
+    }
+
+    function setValor(id, val) {
+      document.getElementById(id).value = val;
+    }
+
+    function depositar() {
+      window.alterarSaldo(50);
+    }
+
+    function sacar() {
+      alert("Saque solicitado com sucesso! (simulação)");
     }
   </script>
 </body>
