@@ -1,6 +1,7 @@
 // firebase.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
@@ -14,6 +15,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
-// Exporta para usar nos outros arquivos
-export { auth, createUserWithEmailAndPassword, signInWithEmailAndPassword };
+// Exportações
+export {
+  auth,
+  db,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
+};
