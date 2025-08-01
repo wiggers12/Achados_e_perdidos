@@ -75,33 +75,32 @@
       color: red;
       font-weight: bold;
     }
-    .top-bar {
+    .saldo, .modo {
       position: absolute;
       top: 10px;
       right: 10px;
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+    .saldo {
       background: #2c2c2c;
       padding: 10px 15px;
       border-radius: 10px;
-      z-index: 10;
+    }
+    .modo button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
     .ativo {
       background-color: green;
       color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
     }
     .inativo {
       background-color: gray;
       color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
     }
     .saldo-icon {
       width: 20px;
@@ -201,9 +200,11 @@
 
   <div id="gameArea">
     <img src="IMG_5585.jpeg" id="aviao" />
-    <div class="top-bar">
+    <div class="saldo">
       <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
-      <strong>R$ <span id="saldo">0.00</span></strong>
+      R$ <span id="saldo">0.00</span>
+    </div>
+    <div class="modo">
       <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
       <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
     </div>
@@ -242,6 +243,32 @@
   </div>
 
   <button class="logout" onclick="logout()">Sair</button>
+
+  <script>
+    window.setValor = function(campo, valor) {
+      document.getElementById(campo).value = valor;
+    };
+
+    window.apostar = function(numero) {
+      const valorAposta = parseFloat(document.getElementById("aposta" + numero).value);
+      const autoCash = parseFloat(document.getElementById("auto" + numero).value);
+
+      if (isNaN(valorAposta) || valorAposta <= 0) {
+        alert("Insira um valor válido para a aposta.");
+        return;
+      }
+
+      const saldoAtual = getSaldoAtual();
+      if (valorAposta > saldoAtual) {
+        alert("Saldo insuficiente.");
+        return;
+      }
+
+      setSaldoAtual(saldoAtual - valorAposta);
+
+      alert(`Aposta ${numero} de R$ ${valorAposta.toFixed(2)} realizada com cash-out ${autoCash || "manual"}`);
+    };
+  </script>
 
   <script type="module" src="main.js"></script>
 </body>
