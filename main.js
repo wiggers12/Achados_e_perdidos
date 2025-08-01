@@ -1,60 +1,62 @@
-import { auth, db } from './firebase.js';
-import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+// main.js
+import { auth } from './firebase.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-let userUID = null;
+const db = getFirestore();
 let modoAtual = 'real';
-let saldoReal = 0;
-let saldoDemo = 0;
 
-// Atualiza o saldo e botões no topo da tela
-function atualizarUI() {
-  document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
-  document.getElementById("btnReal").className = modoAtual === 'real' ? "ativo" : "inativo";
-  document.getElementById("btnDemo").className = modoAtual === 'demo' ? "ativo" : "inativo";
+onAuthStateChanged(auth, user => {
+  if (user) atualizarSaldo();
+});
+
+function mudarModo(modo) {
+  modoAtual = modo;
+  document.getElementById('btnReal').className = modo === 'real' ? 'ativo' : 'inativo';
+  document.getElementById('btnDemo').className = modo === 'demo' ? 'ativo' : 'inativo';
+  atualizarSaldo();
 }
 
-// Trocar entre conta real e demo
-window.mudarModo = function(novoModo) {
-  modoAtual = novoModo;
-  atualizarUI();
-};
+function atualizarSaldo() {
+  const user = auth.currentUser;
+  if (!user) return;
+  const userRef = doc(db, "usuarios", user.uid);
+  getDoc(userRef).then(docSnap => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const saldo = modoAtual === 'real' ? data.saldoreal : data.saldodemo;
+      document.getElementById('saldo').innerText = saldo.toFixed(2);
+    }
+  });
+}
 
-// Obter saldo atual com base no modo
-window.getSaldoAtual = () => (modoAtual === 'real' ? saldoReal : saldoDemo);
+function logout() {
+  signOut(auth).then(() => {
+    window.location.href = "auth.html";
+  });
+}
 
-// Atualizar saldo no Firestore
-window.setSaldoAtual = async (novoSaldo) => {
-  const ref = doc(db, "usuarios", userUID);
-  if (modoAtual === 'real') {
-    saldoReal = novoSaldo;
-    await updateDoc(ref, { saldoReal });
-  } else {
-    saldoDemo = novoSaldo;
-    await updateDoc(ref, { saldoDemo });
-  }
-  atualizarUI();
-};
+function setValor(inputId, valor) {
+  document.getElementById(inputId).value = valor;
+}
 
-// Logout
-window.logout = () => signOut(auth).then(() => location.href = "auth.html");
+function apostar(id) {
+  const valor = parseFloat(document.getElementById(`aposta${id}`).value);
+  const auto = parseFloat(document.getElementById(`auto${id}`).value);
+  alert(`Aposta ${id} registrada com R$${valor.toFixed(2)} | Auto cash-out em ${auto}x (${modoAtual})`);
+}
 
-// Verifica usuário logado e carrega dados
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return location.href = "auth.html";
-  userUID = user.uid;
+function depositar() {
+  alert("Simulação de depósito no modo: " + modoAtual);
+}
 
-  const ref = doc(db, "usuarios", userUID);
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    const data = snap.data();
-    saldoReal = data.saldoReal ?? 0;
-    saldoDemo = data.saldoDemo ?? 0;
-    atualizarUI();
-  } else {
-    await setDoc(ref, { saldoReal: 100, saldoDemo: 100 });
-    saldoReal = 100;
-    saldoDemo = 100;
-    atualizarUI();
-  }
-});
+function sacar() {
+  alert("Simulação de saque no modo: " + modoAtual);
+}
+
+window.logout = logout;
+window.setValor = setValor;
+window.apostar = apostar;
+window.depositar = depositar;
+window.sacar = sacar;
+window.mudarModo = mudarModo;
