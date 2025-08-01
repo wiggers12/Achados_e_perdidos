@@ -2,101 +2,116 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Carteira - AviatorBR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Carteira | AviatorBR</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: Arial, sans-serif;
       background-color: #0e0e0e;
       color: white;
       padding: 20px;
-      text-align: center;
     }
     h1 {
-      color: #ff4757;
+      text-align: center;
+      color: #00ff88;
     }
     .saldo {
+      text-align: center;
       font-size: 2em;
       margin: 20px 0;
-      color: #2ed573;
     }
-    .pix-box {
-      background: #1e1e1e;
-      border: 1px solid #444;
-      border-radius: 10px;
-      padding: 20px;
-      margin: 20px 0;
-    }
-    .pix-box h2 {
-      color: #ffa502;
-    }
-    .pix-code {
-      font-size: 1.1em;
-      color: #fff;
-      background: #333;
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px 0;
-      word-break: break-all;
-    }
-    button {
-      background-color: #2ed573;
-      color: black;
+    .botao {
+      background-color: #00cc66;
+      color: white;
+      padding: 15px;
+      margin: 10px;
       border: none;
-      padding: 10px 20px;
-      font-size: 1.1em;
       border-radius: 10px;
       cursor: pointer;
-      margin: 10px;
+      width: 100%;
+      font-size: 1.2em;
     }
-    button:hover {
-      background-color: #7bed9f;
+    .pix-info {
+      background-color: #222;
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <h1>Carteira</h1>
-  <div class="saldo">
-    Saldo atual: R$ <span id="saldo">100.00</span>
+  <div class="saldo">Saldo: R$ <span id="saldo">0.00</span></div>
+
+  <button class="botao" onclick="depositarPix()">Depositar via Pix</button>
+  <button class="botao" onclick="sacarPix()">Sacar</button>
+
+  <div class="pix-info" id="pixInfo" style="display:none;">
+    <p><strong>Chave Pix:</strong> 34.052.070/0001-05</p>
+    <p><strong>Valor mínimo:</strong> R$ 5,00</p>
+    <p>Após o pagamento, envie o comprovante via WhatsApp.</p>
   </div>
 
-  <div class="pix-box">
-    <h2>Depositar via Pix</h2>
-    <p>Use o CNPJ abaixo para realizar o depósito:</p>
-    <div class="pix-code">34.052.070/0001-05</div>
-    <button onclick="confirmarDeposito()">Já fiz o depósito</button>
-  </div>
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  <div class="pix-box">
-    <h2>Sacar via Pix</h2>
-    <p>Informe o valor desejado:</p>
-    <input type="number" id="valorSaque" placeholder="Valor para saque" style="padding: 10px; border-radius: 5px; border: none; font-size: 1em; width: 80%;">
-    <br>
-    <button onclick="solicitarSaque()">Solicitar Saque</button>
-  </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
+      authDomain: "doce-sabor-caseiro.firebaseapp.com",
+      projectId: "doce-sabor-caseiro",
+      storageBucket: "doce-sabor-caseiro.appspot.com",
+      messagingSenderId: "414062499771",
+      appId: "1:414062499771:web:1a811377bc6bbf145f969e",
+      measurementId: "G-KMC0FC7Z4H"
+    };
 
-  <script>
-    let saldo = 100.00;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
 
-    function confirmarDeposito() {
-      alert("Depósito recebido! Saldo atualizado.");
-      saldo += 50;
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
+    let currentUserUID = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUserUID = user.uid;
+        const userRef = doc(db, "usuarios", currentUserUID);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const dados = userSnap.data();
+          document.getElementById("saldo").innerText = (dados.saldo || 0).toFixed(2);
+        } else {
+          await updateDoc(userRef, { saldo: 0 });
+        }
+      } else {
+        alert("Você precisa estar logado.");
+        window.location.href = "auth.html";
+      }
+    });
+
+    async function depositarPix() {
+      document.getElementById("pixInfo").style.display = "block";
     }
 
-    function solicitarSaque() {
-      const valor = parseFloat(document.getElementById("valorSaque").value);
-      if (isNaN(valor) || valor <= 0) {
-        alert("Informe um valor válido para saque.");
+    async function sacarPix() {
+      const saque = prompt("Digite o valor a sacar:");
+      const valor = parseFloat(saque);
+      if (isNaN(valor) || valor <= 0) return alert("Valor inválido.");
+
+      const userRef = doc(db, "usuarios", currentUserUID);
+      const userSnap = await getDoc(userRef);
+      const saldoAtual = userSnap.data().saldo || 0;
+
+      if (valor > saldoAtual) {
+        alert("Saldo insuficiente.");
         return;
       }
-      if (valor > saldo) {
-        alert("Saldo insuficiente para saque.");
-        return;
-      }
-      saldo -= valor;
-      document.getElementById("saldo").innerText = saldo.toFixed(2);
-      alert("Saque solicitado com sucesso! Enviaremos via Pix.");
+
+      await updateDoc(userRef, { saldo: saldoAtual - valor });
+      document.getElementById("saldo").innerText = (saldoAtual - valor).toFixed(2);
+      alert("Saque solicitado. Enviaremos via Pix manual após verificação.");
     }
   </script>
 </body>
