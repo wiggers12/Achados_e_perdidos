@@ -36,6 +36,7 @@
       padding: 15px;
       margin-top: 10px;
       border-radius: 10px;
+      text-align: center;
     }
   </style>
 </head>
@@ -52,12 +53,11 @@
     <p>Após o pagamento, envie o comprovante via WhatsApp.</p>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
       authDomain: "doce-sabor-caseiro.firebaseapp.com",
@@ -68,22 +68,23 @@
       measurementId: "G-KMC0FC7Z4H"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
 
     let currentUserUID = null;
 
-    auth.onAuthStateChanged(async (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUserUID = user.uid;
-        const docRef = db.collection("usuarios").doc(currentUserUID);
-        const docSnap = await docRef.get();
-        if (docSnap.exists) {
-          const dados = docSnap.data();
+        const userRef = doc(db, "usuarios", currentUserUID);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const dados = userSnap.data();
           document.getElementById("saldo").innerText = (dados.saldo || 0).toFixed(2);
         } else {
-          await docRef.set({ saldo: 0 });
+          await setDoc(userRef, { saldo: 0 });
+          document.getElementById("saldo").innerText = "0.00";
         }
       } else {
         alert("Você precisa estar logado.");
@@ -96,22 +97,26 @@
     }
 
     async function sacarPix() {
-      const saque = prompt("Digite o valor a sacar:");
-      const valor = parseFloat(saque);
-      if (isNaN(valor) || valor <= 0) return alert("Valor inválido.");
+      const valorStr = prompt("Digite o valor que deseja sacar:");
+      const valor = parseFloat(valorStr);
+      if (isNaN(valor) || valor <= 0) {
+        alert("Valor inválido.");
+        return;
+      }
 
-      const docRef = db.collection("usuarios").doc(currentUserUID);
-      const docSnap = await docRef.get();
-      const saldoAtual = docSnap.data().saldo || 0;
+      const userRef = doc(db, "usuarios", currentUserUID);
+      const userSnap = await getDoc(userRef);
+      const saldoAtual = userSnap.data().saldo || 0;
 
       if (valor > saldoAtual) {
         alert("Saldo insuficiente.");
         return;
       }
 
-      await docRef.update({ saldo: saldoAtual - valor });
-      document.getElementById("saldo").innerText = (saldoAtual - valor).toFixed(2);
-      alert("Saque solicitado. Enviaremos via Pix manual após verificação.");
+      const novoSaldo = saldoAtual - valor;
+      await updateDoc(userRef, { saldo: novoSaldo });
+      document.getElementById("saldo").innerText = novoSaldo.toFixed(2);
+      alert(`Saque de R$ ${valor.toFixed(2)} solicitado com sucesso! Enviaremos via Pix após verificação.`);
     }
   </script>
 </body>
