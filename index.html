@@ -15,8 +15,10 @@
     let saldoDemo = 0;
     let mult = 1.0;
     let apostado = false;
+    let autoCash = 0;
     let timer = null;
     let vooFinalizado = false;
+    let rodadaEmAndamento = false;
 
     function atualizarUI() {
       document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
@@ -25,6 +27,10 @@
     }
 
     window.mudarModo = function(novoModo) {
+      if (rodadaEmAndamento) {
+        alert("Espere a rodada terminar para trocar o modo.");
+        return;
+      }
       modoAtual = novoModo;
       atualizarUI();
     };
@@ -66,13 +72,16 @@
     };
 
     function iniciarVoo() {
+      rodadaEmAndamento = true;
       vooFinalizado = false;
+      apostado = false;
+      autoCash = 0;
       const aviao = document.getElementById("aviao");
       const fundo = document.getElementById("fundoAnimado");
       const multiplicadorEl = document.getElementById("multiplicador");
 
       mult = 1.00;
-      const stopMult = apostado ? parseFloat((Math.random() * 9 + 1).toFixed(2)) : parseFloat((Math.random() * 110 + 10).toFixed(2));
+      const stopMult = parseFloat((Math.random() * 110 + 10).toFixed(2));
 
       aviao.style.transition = "none";
       aviao.style.transform = "translateX(0)";
@@ -81,6 +90,10 @@
       timer = setInterval(() => {
         mult += 0.05;
         multiplicadorEl.innerText = mult.toFixed(2) + "x";
+
+        if (apostado && autoCash > 0 && mult >= autoCash) {
+          encerrarAposta(true);
+        }
 
         if (!vooFinalizado && mult >= stopMult) {
           vooParaFora();
@@ -91,11 +104,11 @@
     function vooParaFora() {
       clearInterval(timer);
       vooFinalizado = true;
+      rodadaEmAndamento = false;
       const aviao = document.getElementById("aviao");
       aviao.style.transition = "all 1s ease-out";
       aviao.style.transform = "translateX(100vw) translateY(-100px) rotate(30deg)";
       setTimeout(() => iniciarVoo(), 3000);
-      apostado = false;
     }
 
     window.setValor = function(campo, valor) {
@@ -103,8 +116,17 @@
     };
 
     window.apostar = function(numero) {
+      if (rodadaEmAndamento && apostado) {
+        alert("Você já apostou nesta rodada.");
+        return;
+      }
+      if (!rodadaEmAndamento) {
+        alert("Aguarde a próxima rodada para apostar.");
+        return;
+      }
+
       const valorAposta = parseFloat(document.getElementById("aposta" + numero).value);
-      const autoCash = parseFloat(document.getElementById("auto" + numero).value);
+      autoCash = parseFloat(document.getElementById("auto" + numero).value) || 0;
 
       if (isNaN(valorAposta) || valorAposta <= 0) {
         alert("Insira um valor válido para a aposta.");
@@ -119,15 +141,15 @@
 
       setSaldoAtual(saldoAtual - valorAposta);
       apostado = true;
-      alert(`Aposta de R$ ${valorAposta.toFixed(2)} realizada${autoCash ? " com cash-out em " + autoCash + "x" : ""}`);
+      alert(`Aposta de R$ ${valorAposta.toFixed(2)} realizada${autoCash ? " com auto cash-out em " + autoCash + "x" : ""}`);
     };
 
-    window.encerrarAposta = function() {
+    window.encerrarAposta = function(auto = false) {
       if (apostado) {
         const valorAposta = parseFloat(document.getElementById("aposta1").value) || 10;
         const ganho = parseFloat(valorAposta * mult);
         setSaldoAtual(getSaldoAtual() + ganho);
-        alert(`Você encerrou a aposta e ganhou R$ ${ganho.toFixed(2)}`);
+        alert(`${auto ? "Auto cash-out! " : ""}Você encerrou a aposta e ganhou R$ ${ganho.toFixed(2)}`);
         apostado = false;
       }
     };
@@ -303,7 +325,7 @@
       <button onclick="setValor('aposta1', 50)">50</button>
       <button onclick="setValor('aposta1', 100)">100</button>
     </div>
-    <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
+    <button class="botao-verde" onclick="apostar(1)">Apostar</button>
     <button class="botao-verde" onclick="encerrarAposta()">Encerrar Aposta</button>
   </div>
 
