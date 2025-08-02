@@ -16,6 +16,7 @@
     let mult = 1.0;
     let apostado = false;
     let timer = null;
+    let vooFinalizado = false;
 
     function atualizarUI() {
       document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
@@ -65,39 +66,36 @@
     };
 
     function iniciarVoo() {
+      vooFinalizado = false;
       const aviao = document.getElementById("aviao");
       const fundo = document.getElementById("fundoAnimado");
       const multiplicadorEl = document.getElementById("multiplicador");
 
       mult = 1.00;
-      const stopMult = parseFloat((Math.random() * 10 + 1).toFixed(2)); // Máximo 10.00x se apostado
-      const maxMult = apostado ? 10.0 : 200.0;
+      const stopMult = apostado ? parseFloat((Math.random() * 9 + 1).toFixed(2)) : parseFloat((Math.random() * 110 + 10).toFixed(2));
 
       aviao.style.transition = "none";
       aviao.style.transform = "translateX(0)";
-
       fundo.style.animation = "voar 20s linear infinite";
 
       timer = setInterval(() => {
         mult += 0.05;
         multiplicadorEl.innerText = mult.toFixed(2) + "x";
 
-        // Só pode passar de 10x se ninguém estiver apostando
-        if (apostado && mult >= stopMult) {
-          voarParaFora();
-        } else if (!apostado && mult >= maxMult) {
-          voarParaFora();
+        if (!vooFinalizado && mult >= stopMult) {
+          vooParaFora();
         }
       }, 100);
     }
 
-    function voarParaFora() {
+    function vooParaFora() {
       clearInterval(timer);
+      vooFinalizado = true;
       const aviao = document.getElementById("aviao");
       aviao.style.transition = "all 1s ease-out";
       aviao.style.transform = "translateX(100vw) translateY(-100px) rotate(30deg)";
-      apostado = false;
       setTimeout(() => iniciarVoo(), 3000);
+      apostado = false;
     }
 
     window.setValor = function(campo, valor) {
@@ -276,7 +274,6 @@
 <body>
   <div class="title">Plane.Money</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
-
   <div id="gameArea">
     <div id="fundoAnimado"></div>
     <img src="IMG_5585.jpeg" id="aviao" />
