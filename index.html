@@ -4,6 +4,96 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plane.Money</title>
+  <script type="module">
+    import { auth, db } from './firebase.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    import { doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    let userUID = null;
+    let modoAtual = 'real';
+    let saldoReal = 0;
+    let saldoDemo = 0;
+
+    function atualizarUI() {
+      document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
+      document.getElementById("btnReal").className = modoAtual === 'real' ? "ativo" : "inativo";
+      document.getElementById("btnDemo").className = modoAtual === 'demo' ? "ativo" : "inativo";
+    }
+
+    window.mudarModo = function(novoModo) {
+      modoAtual = novoModo;
+      atualizarUI();
+    };
+
+    window.logout = () => signOut(auth).then(() => location.href = "auth.html");
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) return location.href = "auth.html";
+      userUID = user.uid;
+
+      const ref = doc(db, "usuarios", userUID);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data();
+        saldoReal = data.saldoReal || 0;
+        saldoDemo = data.saldoDemo || 0;
+        atualizarUI();
+      } else {
+        await setDoc(ref, { saldoReal: 100, saldoDemo: 100 });
+        saldoReal = 100;
+        saldoDemo = 100;
+        atualizarUI();
+      }
+
+      iniciarVoo();
+    });
+
+    window.getSaldoAtual = () => (modoAtual === 'real' ? saldoReal : saldoDemo);
+    window.setSaldoAtual = async (novoSaldo) => {
+      const ref = doc(db, "usuarios", userUID);
+      if (modoAtual === 'real') {
+        saldoReal = novoSaldo;
+        await updateDoc(ref, { saldoReal });
+      } else {
+        saldoDemo = novoSaldo;
+        await updateDoc(ref, { saldoDemo });
+      }
+      atualizarUI();
+    };
+
+    function iniciarVoo() {
+      const aviao = document.getElementById("aviao");
+      const fundo = document.getElementById("fundoAnimado");
+      const multiplicadorEl = document.getElementById("multiplicador");
+
+      let x = 0;
+      let mult = 1.00;
+      const stopMult = (Math.random() * 119 + 1).toFixed(2);
+      const velocidade = 2;
+
+      const larguraTela = window.innerWidth;
+
+      const animar = () => {
+        x += velocidade;
+        mult += 0.05;
+        aviao.style.left = x + "px";
+        multiplicadorEl.innerText = mult.toFixed(2) + "x";
+        fundo.style.backgroundPositionX = (-x) + "px";
+
+        if (x >= larguraTela + 100) {
+          aviao.style.display = "none";
+          clearInterval(timer);
+          setTimeout(() => {
+            aviao.style.left = "0px";
+            aviao.style.display = "block";
+            iniciarVoo();
+          }, 3000);
+        }
+      };
+
+      const timer = setInterval(animar, 50);
+    }
+  </script>
   <style>
     body {
       margin: 0;
@@ -19,30 +109,29 @@
       font-size: 2em;
       color: red;
       font-weight: bold;
-      z-index: 10;
     }
     .saldo {
       position: absolute;
       top: 10px;
-      right: 160px;
+      right: 10px;
       background: #2c2c2c;
       padding: 10px 15px;
       border-radius: 10px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      z-index: 10;
+      gap: 8px;
+      z-index: 20;
     }
     .modo {
       position: absolute;
-      top: 10px;
+      top: 60px;
       right: 10px;
       display: flex;
-      gap: 5px;
-      z-index: 10;
+      gap: 10px;
+      z-index: 20;
     }
     .modo button {
-      padding: 6px 10px;
+      padding: 5px 10px;
       border: none;
       border-radius: 5px;
       cursor: pointer;
@@ -55,29 +144,36 @@
       background-color: gray;
       color: white;
     }
+    .saldo-icon {
+      width: 20px;
+      height: 20px;
+    }
     #gameArea {
       position: relative;
       width: 100%;
       height: 300px;
-      background: url('https://www.transparenttextures.com/patterns/asfalt-light.png');
-      background-size: 200% auto;
-      animation: moverFundo 2s linear infinite;
+      background: #1e1e1e;
       overflow: hidden;
+      margin-bottom: 10px;
     }
-    @keyframes moverFundo {
-      from { background-position: 0 0; }
-      to { background-position: -200px 0; }
+    #fundoAnimado {
+      position: absolute;
+      width: 1000%;
+      height: 100%;
+      background-image: linear-gradient(to right, #1e1e1e 50%, #2a2a2a 50%);
+      background-size: 200px 100%;
     }
     #aviao {
       position: absolute;
       top: 200px;
       left: 0;
       width: 100px;
-      transition: transform 0.1s linear;
+      height: auto;
+      z-index: 5;
     }
     .multiplier {
       position: absolute;
-      top: 60px;
+      top: 20px;
       left: 15px;
       font-size: 3em;
       color: #f00;
@@ -136,9 +232,10 @@
   <div class="multiplier" id="multiplicador">1.00x</div>
 
   <div id="gameArea">
+    <div id="fundoAnimado"></div>
     <img src="IMG_5585.jpeg" id="aviao" />
     <div class="saldo">
-      <img style="width: 20px;" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
+      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
       R$ <span id="saldo">0.00</span>
     </div>
     <div class="modo">
@@ -163,117 +260,46 @@
       <button onclick="setValor('aposta1', 50)">50</button>
       <button onclick="setValor('aposta1', 100)">100</button>
     </div>
-    <button class="botao-verde" onclick="apostar(1)">Apostar</button>
+    <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
+  </div>
+
+  <div class="apostas-container">
+    <strong>Aposta 2</strong>
+    <input class="input-aposta" id="aposta2" type="number" placeholder="Valor da aposta" />
+    <input class="input-aposta" id="auto2" type="number" placeholder="Auto cash-out (ex: 3.0)" />
+    <div class="valores-rapidos">
+      <button onclick="setValor('aposta2', 10)">10</button>
+      <button onclick="setValor('aposta2', 20)">20</button>
+      <button onclick="setValor('aposta2', 50)">50</button>
+      <button onclick="setValor('aposta2', 100)">100</button>
+    </div>
+    <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
   </div>
 
   <button class="logout" onclick="logout()">Sair</button>
 
-  <script type="module">
-    import { auth, db } from './firebase.js';
-    import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-    import { doc, getDoc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-    let userUID = null;
-    let modoAtual = 'real';
-    let saldoReal = 0;
-    let saldoDemo = 0;
-
-    window.mudarModo = function(modo) {
-      modoAtual = modo;
-      atualizarUI();
-    };
-
-    function atualizarUI() {
-      document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
-      document.getElementById("btnReal").className = modoAtual === 'real' ? "ativo" : "inativo";
-      document.getElementById("btnDemo").className = modoAtual === 'demo' ? "ativo" : "inativo";
-    }
-
-    window.logout = () => signOut(auth).then(() => location.href = "auth.html");
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return location.href = "auth.html";
-      userUID = user.uid;
-
-      const ref = doc(db, "usuarios", userUID);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const data = snap.data();
-        saldoReal = data.saldoReal || 0;
-        saldoDemo = data.saldoDemo || 0;
-        atualizarUI();
-      } else {
-        await setDoc(ref, { saldoReal: 100, saldoDemo: 100 });
-        saldoReal = 100;
-        saldoDemo = 100;
-        atualizarUI();
-      }
-    });
-
-    window.getSaldoAtual = () => (modoAtual === 'real' ? saldoReal : saldoDemo);
-    window.setSaldoAtual = async (novoSaldo) => {
-      const ref = doc(db, "usuarios", userUID);
-      if (modoAtual === 'real') {
-        saldoReal = novoSaldo;
-        await updateDoc(ref, { saldoReal });
-      } else {
-        saldoDemo = novoSaldo;
-        await updateDoc(ref, { saldoDemo });
-      }
-      atualizarUI();
-    };
-  </script>
-
   <script>
-    let multiplicador = 1.0;
-    let intervaloMultiplicador;
-    let vooFinalizado = false;
-
-    const aviao = document.getElementById("aviao");
-    const multDisplay = document.getElementById("multiplicador");
-
-    function iniciarRodada() {
-      multiplicador = 1.0;
-      vooFinalizado = false;
-      aviao.style.left = "0px";
-      aviao.style.display = "block";
-
-      const limite = Math.random() * 100 + 20; // entre 20x a 120x
-      intervaloMultiplicador = setInterval(() => {
-        multiplicador += 0.05;
-        multDisplay.innerText = `${multiplicador.toFixed(2)}x`;
-
-        const pos = parseFloat(aviao.style.left) + 2;
-        aviao.style.left = pos + "px";
-        aviao.style.transform = `translateY(-${multiplicador}px)`;
-
-        if (multiplicador >= limite) {
-          encerrarRodada();
-        }
-      }, 50);
-    }
-
-    function encerrarRodada() {
-      if (vooFinalizado) return;
-      vooFinalizado = true;
-      clearInterval(intervaloMultiplicador);
-      aviao.style.display = "none";
-      setTimeout(iniciarRodada, 3000);
-    }
-
-    window.onload = iniciarRodada;
-
     window.setValor = function(campo, valor) {
       document.getElementById(campo).value = valor;
     };
 
     window.apostar = function(numero) {
-      const valor = parseFloat(document.getElementById("aposta" + numero).value);
-      if (isNaN(valor) || valor <= 0) return alert("Valor inválido");
-      const saldo = getSaldoAtual();
-      if (valor > saldo) return alert("Saldo insuficiente");
-      setSaldoAtual(saldo - valor);
-      alert(`Aposta ${numero} de R$${valor.toFixed(2)} realizada.`);
+      const valorAposta = parseFloat(document.getElementById("aposta" + numero).value);
+      const autoCash = parseFloat(document.getElementById("auto" + numero).value);
+
+      if (isNaN(valorAposta) || valorAposta <= 0) {
+        alert("Insira um valor válido para a aposta.");
+        return;
+      }
+
+      const saldoAtual = getSaldoAtual();
+      if (valorAposta > saldoAtual) {
+        alert("Saldo insuficiente.");
+        return;
+      }
+
+      setSaldoAtual(saldoAtual - valorAposta);
+      alert(`Aposta ${numero} de R$ ${valorAposta.toFixed(2)} realizada com cash-out ${autoCash || "manual"}`);
     };
   </script>
 </body>
