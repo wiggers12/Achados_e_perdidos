@@ -13,6 +13,10 @@
     let modoAtual = 'real';
     let saldoReal = 0;
     let saldoDemo = 0;
+    let multiplicadorAtual = 1;
+    let timer;
+
+    const apostasAtivas = {};
 
     function atualizarUI() {
       document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
@@ -67,20 +71,22 @@
       const multiplicadorEl = document.getElementById("multiplicador");
 
       let x = 0;
-      let mult = 1.00;
+      multiplicadorAtual = 1.00;
       const stopMult = (Math.random() * 119 + 1).toFixed(2);
       const velocidade = 2;
 
       const larguraTela = window.innerWidth;
 
-      const animar = () => {
+      clearInterval(timer);
+
+      timer = setInterval(() => {
         x += velocidade;
-        mult += 0.05;
+        multiplicadorAtual += 0.05;
         aviao.style.left = x + "px";
-        multiplicadorEl.innerText = mult.toFixed(2) + "x";
+        multiplicadorEl.innerText = multiplicadorAtual.toFixed(2) + "x";
         fundo.style.backgroundPositionX = (-x) + "px";
 
-        if (x >= larguraTela + 100) {
+        if (x >= larguraTela + 100 || multiplicadorAtual >= stopMult) {
           aviao.style.display = "none";
           clearInterval(timer);
           setTimeout(() => {
@@ -89,10 +95,46 @@
             iniciarVoo();
           }, 3000);
         }
-      };
-
-      const timer = setInterval(animar, 50);
+      }, 50);
     }
+
+    window.setValor = function(campo, valor) {
+      document.getElementById(campo).value = valor;
+    };
+
+    window.apostar = function(numero) {
+      const valorAposta = parseFloat(document.getElementById("aposta" + numero).value);
+      const autoCash = parseFloat(document.getElementById("auto" + numero).value);
+
+      if (isNaN(valorAposta) || valorAposta <= 0) {
+        alert("Insira um valor válido para a aposta.");
+        return;
+      }
+
+      const saldoAtual = getSaldoAtual();
+      if (valorAposta > saldoAtual) {
+        alert("Saldo insuficiente.");
+        return;
+      }
+
+      apostasAtivas[numero] = valorAposta;
+      setSaldoAtual(saldoAtual - valorAposta);
+      document.getElementById("botaoEncerrar" + numero).style.display = "inline-block";
+      alert(`Aposta ${numero} de R$ ${valorAposta.toFixed(2)} realizada com cash-out ${autoCash || "manual"}`);
+    };
+
+    window.encerrarAposta = function(numero) {
+      if (!apostasAtivas[numero]) return;
+
+      const valorAposta = apostasAtivas[numero];
+      const ganho = valorAposta * multiplicadorAtual;
+      const saldoAtual = getSaldoAtual();
+
+      setSaldoAtual(saldoAtual + ganho);
+      delete apostasAtivas[numero];
+      document.getElementById("botaoEncerrar" + numero).style.display = "none";
+      alert(`Aposta ${numero} encerrada! Você ganhou R$ ${ganho.toFixed(2)}`);
+    };
   </script>
   <style>
     body {
@@ -206,7 +248,8 @@
       font-size: 1.2em;
       border-radius: 10px;
       cursor: pointer;
-      width: 100%;
+      width: 48%;
+      margin: 1%;
     }
     .input-aposta {
       width: calc(100% - 10px);
@@ -261,6 +304,7 @@
       <button onclick="setValor('aposta1', 100)">100</button>
     </div>
     <button class="botao-verde" id="botao1" onclick="apostar(1)">Apostar</button>
+    <button class="botao-verde" id="botaoEncerrar1" style="display:none;" onclick="encerrarAposta(1)">Encerrar Aposta</button>
   </div>
 
   <div class="apostas-container">
@@ -274,33 +318,9 @@
       <button onclick="setValor('aposta2', 100)">100</button>
     </div>
     <button class="botao-verde" id="botao2" onclick="apostar(2)">Apostar</button>
+    <button class="botao-verde" id="botaoEncerrar2" style="display:none;" onclick="encerrarAposta(2)">Encerrar Aposta</button>
   </div>
 
   <button class="logout" onclick="logout()">Sair</button>
-
-  <script>
-    window.setValor = function(campo, valor) {
-      document.getElementById(campo).value = valor;
-    };
-
-    window.apostar = function(numero) {
-      const valorAposta = parseFloat(document.getElementById("aposta" + numero).value);
-      const autoCash = parseFloat(document.getElementById("auto" + numero).value);
-
-      if (isNaN(valorAposta) || valorAposta <= 0) {
-        alert("Insira um valor válido para a aposta.");
-        return;
-      }
-
-      const saldoAtual = getSaldoAtual();
-      if (valorAposta > saldoAtual) {
-        alert("Saldo insuficiente.");
-        return;
-      }
-
-      setSaldoAtual(saldoAtual - valorAposta);
-      alert(`Aposta ${numero} de R$ ${valorAposta.toFixed(2)} realizada com cash-out ${autoCash || "manual"}`);
-    };
-  </script>
 </body>
 </html>
