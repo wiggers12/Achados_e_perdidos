@@ -25,14 +25,18 @@
       const el = document.createElement("div");
       el.id = "countdown";
       el.style.position = "absolute";
-      el.style.top = "45%";
+      el.style.top = "320px";
       el.style.left = "50%";
-      el.style.transform = "translate(-50%, -50%)";
-      el.style.fontSize = "3em";
+      el.style.transform = "translateX(-50%)";
+      el.style.fontSize = "2em";
       el.style.fontWeight = "bold";
       el.style.color = "#00ff00";
-      el.style.zIndex = "200";
+      el.style.background = "rgba(0,0,0,0.6)";
+      el.style.padding = "10px 20px";
+      el.style.borderRadius = "10px";
+      el.style.zIndex = "1000";
       el.style.display = "none";
+      el.style.transition = "all 0.3s ease-in-out";
       document.body.appendChild(el);
     });
 
@@ -328,9 +332,7 @@
   <div id="gameArea">
     <div id="fundoAnimado"></div>
     <img src="IMG_5585.jpeg" id="aviao" />
-    <div class="saldo">
-      R$ <span id="saldo">0.00</span>
-    </div>
+    <div class="saldo">R$ <span id="saldo">0.00</span></div>
     <div class="modo">
       <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
       <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
