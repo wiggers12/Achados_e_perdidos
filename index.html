@@ -19,26 +19,6 @@
     let timer = null;
     let vooFinalizado = false;
     let rodadaEmAndamento = false;
-    let apostaLiberada = false;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const el = document.createElement("div");
-      el.id = "countdown";
-      el.style.position = "absolute";
-      el.style.top = "320px";
-      el.style.left = "50%";
-      el.style.transform = "translateX(-50%)";
-      el.style.fontSize = "2em";
-      el.style.fontWeight = "bold";
-      el.style.color = "#00ff00";
-      el.style.background = "rgba(0,0,0,0.6)";
-      el.style.padding = "10px 20px";
-      el.style.borderRadius = "10px";
-      el.style.zIndex = "1000";
-      el.style.display = "none";
-      el.style.transition = "all 0.3s ease-in-out";
-      document.body.appendChild(el);
-    });
 
     function atualizarUI() {
       document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
@@ -48,7 +28,7 @@
 
     window.mudarModo = function(novoModo) {
       if (rodadaEmAndamento) {
-        alert("Espere a rodada terminar.");
+        alert("Espere a rodada terminar para trocar o modo.");
         return;
       }
       modoAtual = novoModo;
@@ -75,7 +55,7 @@
         atualizarUI();
       }
 
-      iniciarContagem();
+      iniciarVoo();
     });
 
     window.getSaldoAtual = () => (modoAtual === 'real' ? saldoReal : saldoDemo);
@@ -91,40 +71,17 @@
       atualizarUI();
     };
 
-    function iniciarContagem() {
-      rodadaEmAndamento = false;
-      apostaLiberada = true;
-      apostado = false;
-      autoCash = 0;
-      let segundos = 5;
-      const el = document.getElementById("countdown");
-      el.style.display = "block";
-      el.innerText = `Nova rodada em: ${segundos}s`;
-
-      const intervalo = setInterval(() => {
-        segundos--;
-        if (segundos > 0) {
-          el.innerText = `Nova rodada em: ${segundos}s`;
-        } else {
-          clearInterval(intervalo);
-          el.style.display = "none";
-          iniciarVoo();
-        }
-      }, 1000);
-    }
-
     function iniciarVoo() {
       rodadaEmAndamento = true;
-      apostaLiberada = false;
       vooFinalizado = false;
+      apostado = false;
+      autoCash = 0;
       const aviao = document.getElementById("aviao");
       const fundo = document.getElementById("fundoAnimado");
       const multiplicadorEl = document.getElementById("multiplicador");
 
       mult = 1.00;
-      const stopMult = apostado
-        ? parseFloat((Math.random() * 9 + 1).toFixed(2))
-        : parseFloat((Math.random() * 110 + 10).toFixed(2));
+      const stopMult = parseFloat((Math.random() * 110 + 10).toFixed(2));
 
       aviao.style.transition = "none";
       aviao.style.transform = "translateX(0)";
@@ -151,7 +108,7 @@
       const aviao = document.getElementById("aviao");
       aviao.style.transition = "all 1s ease-out";
       aviao.style.transform = "translateX(100vw) translateY(-100px) rotate(30deg)";
-      setTimeout(() => iniciarContagem(), 3000);
+      setTimeout(() => iniciarVoo(), 3000);
     }
 
     window.setValor = function(campo, valor) {
@@ -159,12 +116,12 @@
     };
 
     window.apostar = function(numero) {
-      if (!apostaLiberada) {
-        alert("Você só pode apostar antes do voo começar.");
+      if (rodadaEmAndamento && apostado) {
+        alert("Você já apostou nesta rodada.");
         return;
       }
-      if (apostado) {
-        alert("Você já apostou.");
+      if (!rodadaEmAndamento) {
+        alert("Aguarde a próxima rodada para apostar.");
         return;
       }
 
@@ -172,7 +129,7 @@
       autoCash = parseFloat(document.getElementById("auto" + numero).value) || 0;
 
       if (isNaN(valorAposta) || valorAposta <= 0) {
-        alert("Insira um valor válido.");
+        alert("Insira um valor válido para a aposta.");
         return;
       }
 
@@ -192,7 +149,7 @@
         const valorAposta = parseFloat(document.getElementById("aposta1").value) || 10;
         const ganho = parseFloat(valorAposta * mult);
         setSaldoAtual(getSaldoAtual() + ganho);
-        alert(`${auto ? "Auto cash-out! " : ""}Você ganhou R$ ${ganho.toFixed(2)}`);
+        alert(`${auto ? "Auto cash-out! " : ""}Você encerrou a aposta e ganhou R$ ${ganho.toFixed(2)}`);
         apostado = false;
       }
     };
@@ -201,37 +158,29 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: #0b0b0b;
-      color: white;
+      background-color: #121212;
+      color: #fff;
+      overflow-x: hidden;
     }
     .title {
       position: absolute;
       top: 10px;
       left: 15px;
       font-size: 2em;
+      color: red;
       font-weight: bold;
-      color: #e63946;
-    }
-    .multiplier {
-      position: absolute;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 5em;
-      color: #f00;
-      font-weight: bold;
-      z-index: 10;
     }
     .saldo {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: #222;
+      background: #2c2c2c;
       padding: 10px 15px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       gap: 8px;
+      z-index: 20;
     }
     .modo {
       position: absolute;
@@ -239,29 +188,33 @@
       right: 10px;
       display: flex;
       gap: 10px;
+      z-index: 20;
+    }
+    .modo button {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
     .ativo {
-      background: green;
+      background-color: green;
       color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
     }
     .inativo {
-      background: gray;
+      background-color: gray;
       color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
+    }
+    .saldo-icon {
+      width: 20px;
+      height: 20px;
     }
     #gameArea {
       position: relative;
       width: 100%;
       height: 300px;
-      background: radial-gradient(circle, #111 0%, #000 100%);
+      background: #1e1e1e;
       overflow: hidden;
+      margin-bottom: 10px;
     }
     #fundoAnimado {
       position: absolute;
@@ -276,52 +229,66 @@
     }
     #aviao {
       position: absolute;
-      top: 130px;
+      top: 120px;
       left: 0;
-      width: 80px;
+      width: 100px;
+      height: auto;
+      z-index: 5;
+      transition: none;
+    }
+    .multiplier {
+      position: absolute;
+      top: 20px;
+      left: 15px;
+      font-size: 3em;
+      color: #f00;
+      font-weight: bold;
+      z-index: 10;
+    }
+    .acoes, .apostas-container {
+      text-align: center;
+      margin: 10px;
+    }
+    .acoes button, .logout {
+      margin: 5px;
+      padding: 5px 15px;
+      background-color: #ccc;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .logout {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+    }
+    .botao-verde {
+      background-color: #00cc00;
+      color: white;
+      border: none;
+      padding: 10px;
+      font-size: 1.2em;
+      border-radius: 10px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 5px;
     }
     .input-aposta {
-      width: 100%;
-      padding: 12px;
+      width: calc(100% - 10px);
+      padding: 10px;
       font-size: 1.2em;
-      margin: 10px 0;
-      border-radius: 8px;
+      margin-bottom: 10px;
+      border-radius: 5px;
       border: none;
-      background: #1a1a1a;
-      color: #fff;
     }
     .valores-rapidos button {
       margin: 5px;
-      padding: 8px 14px;
-      background: #333;
+      padding: 5px 10px;
+      background: #444;
       color: #fff;
       border: none;
       border-radius: 5px;
-      cursor: pointer;
-    }
-    .botao-verde {
-      background: #28a745;
-      color: white;
-      border: none;
-      padding: 14px;
-      font-size: 1.2em;
-      border-radius: 10px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-    }
-    .acoes {
-      text-align: center;
-      margin: 15px;
-    }
-    .acoes button {
-      margin: 10px;
-      padding: 12px 20px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1em;
       cursor: pointer;
     }
   </style>
@@ -332,7 +299,10 @@
   <div id="gameArea">
     <div id="fundoAnimado"></div>
     <img src="IMG_5585.jpeg" id="aviao" />
-    <div class="saldo">R$ <span id="saldo">0.00</span></div>
+    <div class="saldo">
+      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
+      R$ <span id="saldo">0.00</span>
+    </div>
     <div class="modo">
       <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
       <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
@@ -340,10 +310,12 @@
   </div>
 
   <div class="acoes">
-    <button onclick="window.location.href='wallet.html'">💼 Carteira</button>
+    <button onclick="depositar()">💰 Depositar</button>
+    <button onclick="sacar()">🏦 Sacar</button>
+    <button onclick="window.location.href='wallet.html'">Carteira</button>
   </div>
 
-  <div class="apostas-container" style="padding: 15px;">
+  <div class="apostas-container">
     <strong>Aposta 1</strong>
     <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
     <input class="input-aposta" id="auto1" type="number" placeholder="Auto cash-out (ex: 2.0)" />
@@ -357,6 +329,6 @@
     <button class="botao-verde" onclick="encerrarAposta()">Encerrar Aposta</button>
   </div>
 
-  <button class="botao-verde" onclick="logout()" style="position: absolute; bottom: 10px; right: 10px;">Sair</button>
+  <button class="logout" onclick="logout()">Sair</button>
 </body>
 </html>
