@@ -19,6 +19,7 @@
     let timer = null;
     let vooFinalizado = false;
     let rodadaEmAndamento = false;
+    let apostaLiberada = false;
 
     document.addEventListener("DOMContentLoaded", () => {
       const el = document.createElement("div");
@@ -88,6 +89,7 @@
 
     function iniciarContagem() {
       rodadaEmAndamento = false;
+      apostaLiberada = true;
       apostado = false;
       autoCash = 0;
       let segundos = 5;
@@ -109,13 +111,16 @@
 
     function iniciarVoo() {
       rodadaEmAndamento = true;
+      apostaLiberada = false;
       vooFinalizado = false;
       const aviao = document.getElementById("aviao");
       const fundo = document.getElementById("fundoAnimado");
       const multiplicadorEl = document.getElementById("multiplicador");
 
       mult = 1.00;
-      const stopMult = parseFloat((Math.random() * 119 + 1).toFixed(2));
+      const stopMult = apostado
+        ? parseFloat((Math.random() * 9 + 1).toFixed(2)) // entre 1.00x e 10.00x se houver aposta
+        : parseFloat((Math.random() * 110 + 10).toFixed(2)); // até 120x se ninguém apostou
 
       aviao.style.transition = "none";
       aviao.style.transform = "translateX(0)";
@@ -150,8 +155,8 @@
     };
 
     window.apostar = function(numero) {
-      if (!rodadaEmAndamento) {
-        alert("Espere a rodada iniciar.");
+      if (!apostaLiberada) {
+        alert("Você só pode apostar antes do voo começar.");
         return;
       }
       if (apostado) {
