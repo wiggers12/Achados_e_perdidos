@@ -19,23 +19,7 @@
     let timer = null;
     let vooFinalizado = false;
     let rodadaEmAndamento = false;
-
-    function atualizarUI() {
-      document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
-      document.getElementById("btnReal").className = modoAtual === 'real' ? "ativo" : "inativo";
-      document.getElementById("btnDemo").className = modoAtual === 'demo' ? "ativo" : "inativo";
-    }
-
-    window.mudarModo = function(novoModo) {
-      if (rodadaEmAndamento) {
-        alert("Espere a rodada terminar para trocar o modo.");
-        return;
-      }
-      modoAtual = novoModo;
-      atualizarUI();
-    };
-
-    window.logout = () => signOut(auth).then(() => location.href = "auth.html");
+    let apostaLiberada = false;
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) return location.href = "auth.html";
@@ -55,8 +39,25 @@
         atualizarUI();
       }
 
-      iniciarVoo();
+      iniciarContagem();
     });
+
+    function atualizarUI() {
+      document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
+      document.getElementById("btnReal").className = modoAtual === 'real' ? "ativo" : "inativo";
+      document.getElementById("btnDemo").className = modoAtual === 'demo' ? "ativo" : "inativo";
+    }
+
+    window.mudarModo = function(novoModo) {
+      if (rodadaEmAndamento) {
+        alert("Espere a rodada terminar.");
+        return;
+      }
+      modoAtual = novoModo;
+      atualizarUI();
+    };
+
+    window.logout = () => signOut(auth).then(() => location.href = "auth.html");
 
     window.getSaldoAtual = () => (modoAtual === 'real' ? saldoReal : saldoDemo);
     window.setSaldoAtual = async (novoSaldo) => {
@@ -71,17 +72,40 @@
       atualizarUI();
     };
 
-    function iniciarVoo() {
-      rodadaEmAndamento = true;
-      vooFinalizado = false;
+    function iniciarContagem() {
+      rodadaEmAndamento = false;
+      apostaLiberada = true;
       apostado = false;
       autoCash = 0;
+      let segundos = 5;
+      const el = document.getElementById("countdown");
+      el.style.display = "block";
+      el.innerText = `Nova rodada em: ${segundos}s`;
+
+      const intervalo = setInterval(() => {
+        segundos--;
+        if (segundos > 0) {
+          el.innerText = `Nova rodada em: ${segundos}s`;
+        } else {
+          clearInterval(intervalo);
+          el.style.display = "none";
+          iniciarVoo();
+        }
+      }, 1000);
+    }
+
+    function iniciarVoo() {
+      rodadaEmAndamento = true;
+      apostaLiberada = false;
+      vooFinalizado = false;
       const aviao = document.getElementById("aviao");
       const fundo = document.getElementById("fundoAnimado");
       const multiplicadorEl = document.getElementById("multiplicador");
 
       mult = 1.00;
-      const stopMult = parseFloat((Math.random() * 110 + 10).toFixed(2));
+      const stopMult = apostado
+        ? parseFloat((Math.random() * 9 + 1).toFixed(2))
+        : parseFloat((Math.random() * 110 + 10).toFixed(2));
 
       aviao.style.transition = "none";
       aviao.style.transform = "translateX(0)";
@@ -108,20 +132,16 @@
       const aviao = document.getElementById("aviao");
       aviao.style.transition = "all 1s ease-out";
       aviao.style.transform = "translateX(100vw) translateY(-100px) rotate(30deg)";
-      setTimeout(() => iniciarVoo(), 3000);
+      setTimeout(() => iniciarContagem(), 3000);
     }
 
-    window.setValor = function(campo, valor) {
-      document.getElementById(campo).value = valor;
-    };
-
     window.apostar = function(numero) {
-      if (rodadaEmAndamento && apostado) {
-        alert("Você já apostou nesta rodada.");
+      if (!apostaLiberada) {
+        alert("Você só pode apostar antes do voo começar.");
         return;
       }
-      if (!rodadaEmAndamento) {
-        alert("Aguarde a próxima rodada para apostar.");
+      if (apostado) {
+        alert("Você já apostou.");
         return;
       }
 
@@ -129,7 +149,7 @@
       autoCash = parseFloat(document.getElementById("auto" + numero).value) || 0;
 
       if (isNaN(valorAposta) || valorAposta <= 0) {
-        alert("Insira um valor válido para a aposta.");
+        alert("Insira um valor válido.");
         return;
       }
 
@@ -149,12 +169,16 @@
         const valorAposta = parseFloat(document.getElementById("aposta1").value) || 10;
         const ganho = parseFloat(valorAposta * mult);
         setSaldoAtual(getSaldoAtual() + ganho);
-        alert(`${auto ? "Auto cash-out! " : ""}Você encerrou a aposta e ganhou R$ ${ganho.toFixed(2)}`);
+        alert(`${auto ? "Auto cash-out! " : ""}Você ganhou R$ ${ganho.toFixed(2)}`);
         apostado = false;
       }
     };
+
+    window.setValor = function(campo, valor) {
+      document.getElementById(campo).value = valor;
+    };
   </script>
-  <style>
+    <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -245,6 +269,18 @@
       font-weight: bold;
       z-index: 10;
     }
+    #countdown {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 16px;
+      border-radius: 10px;
+      display: none;
+      z-index: 30;
+    }
     .acoes, .apostas-container {
       text-align: center;
       margin: 10px;
@@ -295,6 +331,7 @@
 </head>
 <body>
   <div class="title">Plane.Money</div>
+  <div id="countdown">Nova rodada em: 5s</div>
   <div class="multiplier" id="multiplicador">1.00x</div>
   <div id="gameArea">
     <div id="fundoAnimado"></div>
@@ -310,9 +347,7 @@
   </div>
 
   <div class="acoes">
-    <button onclick="depositar()">💰 Depositar</button>
-    <button onclick="sacar()">🏦 Sacar</button>
-    <button onclick="window.location.href='wallet.html'">Carteira</button>
+    <button onclick="window.location.href='wallet.html'">💼 Carteira</button>
   </div>
 
   <div class="apostas-container">
