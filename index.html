@@ -7,134 +7,200 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://kit.fontawesome.com/a2d9d5a4f1.js" crossorigin="anonymous"></script>
 <style>
-  body {
-    margin: 0; font-family: 'Inter', sans-serif; background: #0f141a; color: #eaf2f8;
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:#0f141a;color:#eaf2f8;}
+
+  /* ======== TELA INICIAL ======== */
+  #telaInicio {
+    position:fixed;
+    top:0;left:0;width:100%;height:100%;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+    z-index:999;
+    transition:opacity 0.8s ease;
   }
+  #telaInicio img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:brightness(0.5);
+  }
+  #telaInicio .overlay {
+    position:absolute;
+    top:0;left:0;width:100%;height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    background:rgba(0,0,0,0.4);
+  }
+  #telaInicio h1 {
+    color:#ff7a00;
+    font-size:2.2rem;
+    margin-bottom:10px;
+  }
+  #telaInicio p {
+    color:#ccc;
+    max-width:320px;
+    margin-bottom:25px;
+  }
+  #telaInicio button {
+    background:#ff7a00;
+    color:#111;
+    font-weight:700;
+    border:none;
+    padding:12px 28px;
+    border-radius:8px;
+    font-size:1rem;
+    cursor:pointer;
+    transition:0.3s;
+  }
+  #telaInicio button:hover { background:#ffaa33; }
+
+  /* ======== APP PRINCIPAL ======== */
   header {
-    background: #1b242d; padding: 15px; text-align: center; font-weight: 700; font-size: 1.3rem;
-    color: #ff7a00; box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    background:#1b242d;padding:15px;text-align:center;font-weight:700;font-size:1.3rem;
+    color:#ff7a00;box-shadow:0 2px 10px rgba(0,0,0,0.4);
   }
-  main {
-    padding: 20px; max-width: 800px; margin: auto;
-  }
-  h2 { text-align: center; color: #ff7a00; margin-bottom: 10px; }
+  main {padding:20px;max-width:800px;margin:auto;}
+  h2{text-align:center;color:#ff7a00;margin-bottom:10px;}
 
-  /* Botões principais */
   .btn {
-    padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600;
-    transition: 0.2s; font-size: 0.95rem;
+    padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-weight:600;
+    transition:0.2s;font-size:0.95rem;
   }
-  .btn:hover { opacity: 0.8; }
-  .btn-add { background: #ff7a00; color: #111; margin-bottom: 15px; }
-  .btn-clear { background: #444; color: #fff; margin-top: 10px; }
+  .btn:hover{opacity:0.8;}
+  .btn-add{background:#ff7a00;color:#111;margin-bottom:15px;}
+  .btn-clear{background:#444;color:#fff;margin-top:10px;}
 
-  /* Formulário */
   form {
-    display: none; flex-direction: column; gap: 10px; background: #18222c; padding: 20px; border-radius: 10px; margin-bottom: 20px;
+    display:none;flex-direction:column;gap:10px;background:#18222c;padding:20px;border-radius:10px;margin-bottom:20px;
   }
-  input, select, textarea {
-    padding: 10px; border-radius: 6px; border: 1px solid #333; background: #111820; color: #fff; width: 100%;
+  input,select,textarea {
+    padding:10px;border-radius:6px;border:1px solid #333;background:#111820;color:#fff;width:100%;
   }
-  label { font-weight: 600; color: #ccc; }
+  label{font-weight:600;color:#ccc;}
 
-  /* Filtros e busca */
   .filtros {
-    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px;
+    display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;
   }
-  .filtros select, .filtros input {
-    background: #111820; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 8px;
+  .filtros select,.filtros input {
+    background:#111820;border:1px solid #333;border-radius:8px;color:#fff;padding:8px;
   }
 
-  /* Cards */
   .grid {
-    display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: 15px;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;
   }
   .card {
-    background: #18222c; border-radius: 10px; padding: 15px; text-align: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    background:#18222c;border-radius:10px;padding:15px;text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.3);
   }
   .card img {
-    width: 100%; height: 160px; object-fit: cover; border-radius: 8px;
+    width:100%;height:160px;object-fit:cover;border-radius:8px;
   }
-  .card h3 { margin: 10px 0 5px; }
+  .card h3{margin:10px 0 5px;}
   .tag {
-    display: inline-block; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; margin: 5px;
+    display:inline-block;padding:5px 10px;border-radius:8px;font-size:0.8rem;font-weight:bold;margin:5px;
   }
-  .perdido { background: #ff4d4d; color: #fff; }
-  .achado { background: #00c851; color: #fff; }
+  .perdido{background:#ff4d4d;color:#fff;}
+  .achado{background:#00c851;color:#fff;}
 
-  footer {
-    text-align: center; padding: 15px; font-size: 0.8rem; background: #111820; color: #aaa; margin-top: 30px;
-  }
+  footer{text-align:center;padding:15px;font-size:0.8rem;background:#111820;color:#aaa;margin-top:30px;}
 
-  /* Modal */
   .modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.8);display:none;justify-content:center;align-items:center;z-index:1000;
   }
   .modal-content {
-    background: #1b242d; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%;
+    background:#1b242d;padding:20px;border-radius:10px;max-width:400px;width:90%;
   }
-  .modal-content img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
-  .modal-content h3 { color: #ff7a00; margin-top: 0; }
-  .close-btn { background: #ff7a00; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+  .modal-content img{width:100%;border-radius:8px;margin-bottom:10px;}
+  .modal-content h3{color:#ff7a00;margin-top:0;}
+  .close-btn{background:#ff7a00;border:none;padding:8px 16px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:10px;}
 </style>
 </head>
 <body>
 
-<header><i class="fas fa-search"></i> Achados & Perdidos</header>
-<main>
-  <button class="btn btn-add" onclick="toggleForm()">+ Adicionar Item</button>
-
-  <form id="formItem">
-    <label>Tipo:</label>
-    <select id="tipo" required>
-      <option value="">Selecione...</option>
-      <option value="perdido">Perdido</option>
-      <option value="achado">Achado</option>
-    </select>
-    <label>Categoria:</label>
-    <select id="categoria">
-      <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
-    </select>
-    <label>Descrição:</label>
-    <textarea id="descricao" rows="3" placeholder="Descreva o item"></textarea>
-    <label>Local:</label>
-    <input id="local" type="text" placeholder="Onde foi perdido/encontrado?"/>
-    <label>Data:</label>
-    <input id="data" type="date"/>
-    <label>Contato (WhatsApp):</label>
-    <input id="contato" type="text" placeholder="(51) 99999-9999"/>
-    <label>Foto:</label>
-    <input id="foto" type="file" accept="image/*"/>
-    <button class="btn btn-add" type="button" onclick="salvarItem()">Salvar Item</button>
-  </form>
-
-  <div class="filtros">
-    <input id="busca" type="text" placeholder="Buscar..."/>
-    <select id="filtroTipo">
-      <option value="">Todos</option>
-      <option value="perdido">Perdido</option>
-      <option value="achado">Achado</option>
-    </select>
-    <select id="filtroCategoria">
-      <option value="">Todas categorias</option>
-      <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
-    </select>
+<!-- ========== TELA INICIAL ========== -->
+<div id="telaInicio">
+  <img src="imagem.jpg" alt="Celular perdido">
+  <div class="overlay">
+    <h1>Achados & Perdidos</h1>
+    <p>Conectando pessoas e objetos perdidos com rapidez e segurança.</p>
+    <button onclick="entrarApp()">Entrar</button>
   </div>
+</div>
 
-  <div class="grid" id="listaItens"></div>
-  <button class="btn btn-clear" onclick="limparTudo()">🗑 Limpar Tudo</button>
-</main>
+<!-- ========== APP PRINCIPAL ========== -->
+<div id="app" style="display:none;">
+  <header><i class="fas fa-search"></i> Achados & Perdidos</header>
+  <main>
+    <button class="btn btn-add" onclick="toggleForm()">+ Adicionar Item</button>
 
-<footer>© <span id="ano"></span> App Achados & Perdidos</footer>
+    <form id="formItem">
+      <label>Tipo:</label>
+      <select id="tipo" required>
+        <option value="">Selecione...</option>
+        <option value="perdido">Perdido</option>
+        <option value="achado">Achado</option>
+      </select>
+      <label>Categoria:</label>
+      <select id="categoria">
+        <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
+      </select>
+      <label>Descrição:</label>
+      <textarea id="descricao" rows="3" placeholder="Descreva o item"></textarea>
+      <label>Local:</label>
+      <input id="local" type="text" placeholder="Onde foi perdido/encontrado?"/>
+      <label>Data:</label>
+      <input id="data" type="date"/>
+      <label>Contato (WhatsApp):</label>
+      <input id="contato" type="text" placeholder="(51) 99999-9999"/>
+      <label>Foto:</label>
+      <input id="foto" type="file" accept="image/*"/>
+      <button class="btn btn-add" type="button" onclick="salvarItem()">Salvar Item</button>
+    </form>
 
-<!-- Modal -->
-<div class="modal" id="modalItem">
-  <div class="modal-content" id="modalConteudo"></div>
+    <div class="filtros">
+      <input id="busca" type="text" placeholder="Buscar..."/>
+      <select id="filtroTipo">
+        <option value="">Todos</option>
+        <option value="perdido">Perdido</option>
+        <option value="achado">Achado</option>
+      </select>
+      <select id="filtroCategoria">
+        <option value="">Todas categorias</option>
+        <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
+      </select>
+    </div>
+
+    <div class="grid" id="listaItens"></div>
+    <button class="btn btn-clear" onclick="limparTudo()">🗑 Limpar Tudo</button>
+  </main>
+
+  <footer>© <span id="ano"></span> App Achados & Perdidos</footer>
+
+  <div class="modal" id="modalItem">
+    <div class="modal-content" id="modalConteudo"></div>
+  </div>
 </div>
 
 <script>
+  // --- Tela Inicial ---
+  function entrarApp() {
+    const tela = document.getElementById('telaInicio');
+    tela.style.opacity = '0';
+    setTimeout(() => {
+      tela.style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    }, 800);
+  }
+
+  // --- App Principal ---
   const form = document.getElementById('formItem');
   const lista = document.getElementById('listaItens');
   const busca = document.getElementById('busca');
@@ -145,85 +211,75 @@
 
   let itens = JSON.parse(localStorage.getItem('itensAchados')) || [];
 
-  function toggleForm() {
-    form.style.display = form.style.display === 'flex' ? 'none' : 'flex';
-  }
+  function toggleForm(){form.style.display=form.style.display==='flex'?'none':'flex';}
 
-  function salvarItem() {
-    const reader = new FileReader();
-    const arquivo = document.getElementById('foto').files[0];
-    reader.onloadend = () => {
-      const item = {
-        id: Date.now(),
-        tipo: document.getElementById('tipo').value,
-        categoria: document.getElementById('categoria').value,
-        descricao: document.getElementById('descricao').value,
-        local: document.getElementById('local').value,
-        data: document.getElementById('data').value,
-        contato: document.getElementById('contato').value,
-        foto: reader.result
+  function salvarItem(){
+    const reader=new FileReader();
+    const arquivo=document.getElementById('foto').files[0];
+    reader.onloadend=()=>{
+      const item={
+        id:Date.now(),
+        tipo:document.getElementById('tipo').value,
+        categoria:document.getElementById('categoria').value,
+        descricao:document.getElementById('descricao').value,
+        local:document.getElementById('local').value,
+        data:document.getElementById('data').value,
+        contato:document.getElementById('contato').value,
+        foto:reader.result
       };
       itens.push(item);
-      localStorage.setItem('itensAchados', JSON.stringify(itens));
-      form.reset();
-      form.style.display = 'none';
-      renderizarItens();
+      localStorage.setItem('itensAchados',JSON.stringify(itens));
+      form.reset();form.style.display='none';renderizarItens();
     };
-    if (arquivo) reader.readAsDataURL(arquivo);
-    else reader.onloadend();
+    if(arquivo)reader.readAsDataURL(arquivo);else reader.onloadend();
   }
 
-  function renderizarItens() {
-    lista.innerHTML = '';
-    const filtroBusca = busca.value.toLowerCase();
-    const tipoSel = filtroTipo.value;
-    const catSel = filtroCategoria.value;
-    const filtrados = itens.filter(i =>
-      (!tipoSel || i.tipo === tipoSel) &&
-      (!catSel || i.categoria === catSel) &&
-      (i.descricao.toLowerCase().includes(filtroBusca) || i.local.toLowerCase().includes(filtroBusca))
+  function renderizarItens(){
+    lista.innerHTML='';
+    const filtroBusca=busca.value.toLowerCase();
+    const tipoSel=filtroTipo.value;
+    const catSel=filtroCategoria.value;
+    const filtrados=itens.filter(i=>
+      (!tipoSel||i.tipo===tipoSel)&&
+      (!catSel||i.categoria===catSel)&&
+      (i.descricao.toLowerCase().includes(filtroBusca)||i.local.toLowerCase().includes(filtroBusca))
     );
-    filtrados.reverse().forEach(i => {
-      const div = document.createElement('div');
-      div.className = 'card';
-      div.innerHTML = `
-        <img src="${i.foto || 'https://via.placeholder.com/300x160?text=Sem+Imagem'}" alt="${i.descricao}">
+    filtrados.reverse().forEach(i=>{
+      const div=document.createElement('div');
+      div.className='card';
+      div.innerHTML=`
+        <img src="${i.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}" alt="${i.descricao}">
         <h3>${i.descricao}</h3>
         <span class="tag ${i.tipo}">${i.tipo.toUpperCase()}</span>
         <p>${i.categoria}</p>
-        <button class="btn btn-add" onclick="verItem(${i.id})">Ver Detalhes</button>
-      `;
+        <button class="btn btn-add" onclick="verItem(${i.id})">Ver Detalhes</button>`;
       lista.appendChild(div);
     });
   }
 
-  function verItem(id) {
-    const i = itens.find(x => x.id === id);
-    modalConteudo.innerHTML = `
-      <img src="${i.foto || 'https://via.placeholder.com/300x160?text=Sem+Imagem'}">
+  function verItem(id){
+    const i=itens.find(x=>x.id===id);
+    modalConteudo.innerHTML=`
+      <img src="${i.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}">
       <h3>${i.descricao}</h3>
       <p><b>Tipo:</b> ${i.tipo}</p>
       <p><b>Categoria:</b> ${i.categoria}</p>
       <p><b>Local:</b> ${i.local}</p>
       <p><b>Data:</b> ${i.data}</p>
       <p><b>Contato:</b> ${i.contato}</p>
-      <button class="close-btn" onclick="modal.style.display='none'">Fechar</button>
-    `;
-    modal.style.display = 'flex';
+      <button class="close-btn" onclick="modal.style.display='none'">Fechar</button>`;
+    modal.style.display='flex';
   }
 
-  function limparTudo() {
-    if (confirm('Tem certeza que deseja apagar todos os registros?')) {
-      localStorage.removeItem('itensAchados');
-      itens = [];
-      renderizarItens();
+  function limparTudo(){
+    if(confirm('Tem certeza que deseja apagar todos os registros?')){
+      localStorage.removeItem('itensAchados');itens=[];renderizarItens();
     }
   }
 
-  busca.oninput = filtroTipo.onchange = filtroCategoria.onchange = renderizarItens;
-  document.getElementById('ano').textContent = new Date().getFullYear();
+  busca.oninput=filtroTipo.onchange=filtroCategoria.onchange=renderizarItens;
+  document.getElementById('ano').textContent=new Date().getFullYear();
   renderizarItens();
 </script>
-
 </body>
 </html>
