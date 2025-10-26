@@ -1,370 +1,229 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Plane.Money</title>
-  <script type="module">
-    import { auth, db } from './firebase.js';
-    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { doc, getDoc, updateDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achados & Perdidos - App Inteligente</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://kit.fontawesome.com/a2d9d5a4f1.js" crossorigin="anonymous"></script>
+<style>
+  body {
+    margin: 0; font-family: 'Inter', sans-serif; background: #0f141a; color: #eaf2f8;
+  }
+  header {
+    background: #1b242d; padding: 15px; text-align: center; font-weight: 700; font-size: 1.3rem;
+    color: #ff7a00; box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  }
+  main {
+    padding: 20px; max-width: 800px; margin: auto;
+  }
+  h2 { text-align: center; color: #ff7a00; margin-bottom: 10px; }
 
-    let userUID = null;
-    let modoAtual = 'real';
-    let saldoReal = 0;
-    let saldoDemo = 0;
-    let mult = 1.0;
-    let apostado = false;
-    let autoCash = 0;
-    let timer = null;
-    let vooFinalizado = false;
-    let rodadaEmAndamento = false;
-    let apostaLiberada = false;
+  /* Botões principais */
+  .btn {
+    padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600;
+    transition: 0.2s; font-size: 0.95rem;
+  }
+  .btn:hover { opacity: 0.8; }
+  .btn-add { background: #ff7a00; color: #111; margin-bottom: 15px; }
+  .btn-clear { background: #444; color: #fff; margin-top: 10px; }
 
-    function atualizarUI() {
-      document.getElementById("saldo").innerText = (modoAtual === 'real' ? saldoReal : saldoDemo).toFixed(2);
-      document.getElementById("btnReal").className = modoAtual === 'real' ? "ativo" : "inativo";
-      document.getElementById("btnDemo").className = modoAtual === 'demo' ? "ativo" : "inativo";
-    }
+  /* Formulário */
+  form {
+    display: none; flex-direction: column; gap: 10px; background: #18222c; padding: 20px; border-radius: 10px; margin-bottom: 20px;
+  }
+  input, select, textarea {
+    padding: 10px; border-radius: 6px; border: 1px solid #333; background: #111820; color: #fff; width: 100%;
+  }
+  label { font-weight: 600; color: #ccc; }
 
-    window.mudarModo = function(novoModo) {
-      if (rodadaEmAndamento) {
-        alert("Espere a rodada terminar para trocar o modo.");
-        return;
-      }
-      modoAtual = novoModo;
-      atualizarUI();
-    };
+  /* Filtros e busca */
+  .filtros {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px;
+  }
+  .filtros select, .filtros input {
+    background: #111820; border: 1px solid #333; border-radius: 8px; color: #fff; padding: 8px;
+  }
 
-    window.logout = () => signOut(auth).then(() => location.href = "auth.html");
+  /* Cards */
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: 15px;
+  }
+  .card {
+    background: #18222c; border-radius: 10px; padding: 15px; text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  .card img {
+    width: 100%; height: 160px; object-fit: cover; border-radius: 8px;
+  }
+  .card h3 { margin: 10px 0 5px; }
+  .tag {
+    display: inline-block; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; margin: 5px;
+  }
+  .perdido { background: #ff4d4d; color: #fff; }
+  .achado { background: #00c851; color: #fff; }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return location.href = "auth.html";
-      userUID = user.uid;
+  footer {
+    text-align: center; padding: 15px; font-size: 0.8rem; background: #111820; color: #aaa; margin-top: 30px;
+  }
 
-      const ref = doc(db, "usuarios", userUID);
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const data = snap.data();
-        saldoReal = data.saldoReal || 0;
-        saldoDemo = data.saldoDemo || 0;
-        atualizarUI();
-      } else {
-        await setDoc(ref, { saldoReal: 100, saldoDemo: 100 });
-        saldoReal = 100;
-        saldoDemo = 100;
-        atualizarUI();
-      }
-
-      iniciarContagem();
-    });
-
-    function iniciarContagem() {
-      rodadaEmAndamento = false;
-      apostaLiberada = true;
-      apostado = false;
-      autoCash = 0;
-      let segundos = 5;
-      const el = document.getElementById("countdown");
-      el.style.display = "block";
-      el.innerText = `Nova rodada em: ${segundos}s`;
-
-      const intervalo = setInterval(() => {
-        segundos--;
-        if (segundos > 0) {
-          el.innerText = `Nova rodada em: ${segundos}s`;
-        } else {
-          clearInterval(intervalo);
-          el.style.display = "none";
-          iniciarVoo();
-        }
-      }, 1000);
-    }
-
-    function iniciarVoo() {
-      rodadaEmAndamento = true;
-      apostaLiberada = false;
-      vooFinalizado = false;
-      const aviao = document.getElementById("aviao");
-      const fundo = document.getElementById("fundoAnimado");
-      const multiplicadorEl = document.getElementById("multiplicador");
-
-      mult = 1.00;
-
-      // Multiplicador inteligente
-      let stopMult = 2.0;
-      const chance = Math.random();
-      if (apostado) {
-        if (chance < 0.90) stopMult = parseFloat((Math.random() * 2.9 + 1.1).toFixed(2)); // 90% de chance de 1.1x até 4x
-        else if (chance < 0.97) stopMult = parseFloat((Math.random() * 6 + 4).toFixed(2)); // 7% de chance de 4x a 10x
-        else stopMult = parseFloat((Math.random() * 20 + 10).toFixed(2)); // 3% chance de 10x a 30x
-      } else {
-        stopMult = parseFloat((Math.random() * 110 + 10).toFixed(2));
-      }
-
-      aviao.style.transition = "none";
-      aviao.style.transform = "translateX(0)";
-      fundo.style.animation = "voar 20s linear infinite";
-
-      timer = setInterval(() => {
-        mult += 0.05;
-        multiplicadorEl.innerText = mult.toFixed(2) + "x";
-
-        if (apostado && autoCash > 0 && mult >= autoCash) {
-          encerrarAposta(true);
-        }
-
-        if (!vooFinalizado && mult >= stopMult) {
-          vooParaFora();
-        }
-      }, 100);
-    }    function vooParaFora() {
-      clearInterval(timer);
-      vooFinalizado = true;
-      rodadaEmAndamento = false;
-      const aviao = document.getElementById("aviao");
-      aviao.style.transition = "all 1s ease-out";
-      aviao.style.transform = "translateX(100vw) translateY(-100px) rotate(30deg)";
-      setTimeout(() => iniciarContagem(), 3000);
-    }
-
-    window.setValor = function(campo, valor) {
-      document.getElementById(campo).value = valor;
-    };
-
-    window.getSaldoAtual = () => (modoAtual === 'real' ? saldoReal : saldoDemo);
-    window.setSaldoAtual = async (novoSaldo) => {
-      const ref = doc(db, "usuarios", userUID);
-      if (modoAtual === 'real') {
-        saldoReal = novoSaldo;
-        await updateDoc(ref, { saldoReal });
-      } else {
-        saldoDemo = novoSaldo;
-        await updateDoc(ref, { saldoDemo });
-      }
-      atualizarUI();
-    };
-
-    window.apostar = function(numero) {
-      if (!apostaLiberada) {
-        alert("Espere o início da rodada para apostar.");
-        return;
-      }
-      if (apostado) {
-        alert("Você já apostou nesta rodada.");
-        return;
-      }
-
-      const valorAposta = parseFloat(document.getElementById("aposta" + numero).value);
-      autoCash = parseFloat(document.getElementById("auto" + numero).value) || 0;
-
-      if (isNaN(valorAposta) || valorAposta <= 0) {
-        alert("Insira um valor válido para a aposta.");
-        return;
-      }
-
-      const saldoAtual = getSaldoAtual();
-      if (valorAposta > saldoAtual) {
-        alert("Saldo insuficiente.");
-        return;
-      }
-
-      setSaldoAtual(saldoAtual - valorAposta);
-      apostado = true;
-      alert(`Aposta de R$ ${valorAposta.toFixed(2)} realizada${autoCash ? " com auto cash-out em " + autoCash + "x" : ""}`);
-    };
-
-    window.encerrarAposta = function(auto = false) {
-      if (apostado) {
-        const valorAposta = parseFloat(document.getElementById("aposta1").value) || 10;
-        const ganho = parseFloat(valorAposta * mult);
-        setSaldoAtual(getSaldoAtual() + ganho);
-        alert(`${auto ? "Auto cash-out! " : ""}Você encerrou a aposta e ganhou R$ ${ganho.toFixed(2)}`);
-        apostado = false;
-      }
-    };
-  </script>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #121212;
-      color: #fff;
-      overflow-x: hidden;
-    }
-    .title {
-      position: absolute;
-      top: 10px;
-      left: 15px;
-      font-size: 2em;
-      color: red;
-      font-weight: bold;
-    }
-    .saldo {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #2c2c2c;
-      padding: 10px 15px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 20;
-    }
-    .modo {
-      position: absolute;
-      top: 60px;
-      right: 10px;
-      display: flex;
-      gap: 10px;
-      z-index: 20;
-    }
-    .modo button {
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .ativo {
-      background-color: green;
-      color: white;
-    }
-    .inativo {
-      background-color: gray;
-      color: white;
-    }
-    .saldo-icon {
-      width: 20px;
-      height: 20px;
-    }
-    #gameArea {
-      position: relative;
-      width: 100%;
-      height: 300px;
-      background: #1e1e1e;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    #fundoAnimado {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: repeating-linear-gradient(to right, #1e1e1e 0 50px, #2a2a2a 50px 100px);
-      animation: voar 20s linear infinite;
-    }
-    @keyframes voar {
-      0% { background-position-x: 0; }
-      100% { background-position-x: -1000px; }
-    }
-    #aviao {
-      position: absolute;
-      top: 120px;
-      left: 0;
-      width: 100px;
-      height: auto;
-      z-index: 5;
-      transition: none;
-    }
-    .multiplier {
-      position: absolute;
-      top: 20px;
-      left: 15px;
-      font-size: 3em;
-      color: #f00;
-      font-weight: bold;
-      z-index: 10;
-    }
-    .acoes, .apostas-container {
-      text-align: center;
-      margin: 10px;
-    }
-    .acoes button, .logout {
-      margin: 5px;
-      padding: 5px 15px;
-      background-color: #ccc;
-      color: #000;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-    .logout {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-    }
-    .botao-verde {
-      background-color: #00cc00;
-      color: white;
-      border: none;
-      padding: 10px;
-      font-size: 1.2em;
-      border-radius: 10px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 5px;
-    }
-    .input-aposta {
-      width: calc(100% - 10px);
-      padding: 10px;
-      font-size: 1.2em;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-    }
-    .valores-rapidos button {
-      margin: 5px;
-      padding: 5px 10px;
-      background: #444;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #countdown {
-      text-align: center;
-      font-size: 1.5em;
-      margin: 10px;
-      display: none;
-    }
-  </style>
+  /* Modal */
+  .modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;
+  }
+  .modal-content {
+    background: #1b242d; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%;
+  }
+  .modal-content img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
+  .modal-content h3 { color: #ff7a00; margin-top: 0; }
+  .close-btn { background: #ff7a00; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+</style>
 </head>
 <body>
-  <div class="title">Plane.Money</div>
-  <div class="multiplier" id="multiplicador">1.00x</div>
-  <div id="gameArea">
-    <div id="fundoAnimado"></div>
-    <img src="IMG_5585.jpeg" id="aviao" />
-    <div class="saldo">
-      <img class="saldo-icon" src="https://cdn-icons-png.flaticon.com/512/123/123221.png" />
-      R$ <span id="saldo">0.00</span>
-    </div>
-    <div class="modo">
-      <button id="btnReal" class="ativo" onclick="mudarModo('real')">Modo Real</button>
-      <button id="btnDemo" class="inativo" onclick="mudarModo('demo')">Modo Demo</button>
-    </div>
+
+<header><i class="fas fa-search"></i> Achados & Perdidos</header>
+<main>
+  <button class="btn btn-add" onclick="toggleForm()">+ Adicionar Item</button>
+
+  <form id="formItem">
+    <label>Tipo:</label>
+    <select id="tipo" required>
+      <option value="">Selecione...</option>
+      <option value="perdido">Perdido</option>
+      <option value="achado">Achado</option>
+    </select>
+    <label>Categoria:</label>
+    <select id="categoria">
+      <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
+    </select>
+    <label>Descrição:</label>
+    <textarea id="descricao" rows="3" placeholder="Descreva o item"></textarea>
+    <label>Local:</label>
+    <input id="local" type="text" placeholder="Onde foi perdido/encontrado?"/>
+    <label>Data:</label>
+    <input id="data" type="date"/>
+    <label>Contato (WhatsApp):</label>
+    <input id="contato" type="text" placeholder="(51) 99999-9999"/>
+    <label>Foto:</label>
+    <input id="foto" type="file" accept="image/*"/>
+    <button class="btn btn-add" type="button" onclick="salvarItem()">Salvar Item</button>
+  </form>
+
+  <div class="filtros">
+    <input id="busca" type="text" placeholder="Buscar..."/>
+    <select id="filtroTipo">
+      <option value="">Todos</option>
+      <option value="perdido">Perdido</option>
+      <option value="achado">Achado</option>
+    </select>
+    <select id="filtroCategoria">
+      <option value="">Todas categorias</option>
+      <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
+    </select>
   </div>
 
-  <div id="countdown">Nova rodada em: 5s</div>
+  <div class="grid" id="listaItens"></div>
+  <button class="btn btn-clear" onclick="limparTudo()">🗑 Limpar Tudo</button>
+</main>
 
-  <div class="acoes">
-    <button onclick="window.location.href='wallet.html'">Carteira</button>
-  </div>
+<footer>© <span id="ano"></span> App Achados & Perdidos</footer>
 
-  <div class="apostas-container">
-    <strong>Aposta 1</strong>
-    <input class="input-aposta" id="aposta1" type="number" placeholder="Valor da aposta" />
-    <input class="input-aposta" id="auto1" type="number" placeholder="Auto cash-out (ex: 2.0)" />
-    <div class="valores-rapidos">
-      <button onclick="setValor('aposta1', 10)">10</button>
-      <button onclick="setValor('aposta1', 20)">20</button>
-      <button onclick="setValor('aposta1', 50)">50</button>
-      <button onclick="setValor('aposta1', 100)">100</button>
-    </div>
-    <button class="botao-verde" onclick="apostar(1)">Apostar</button>
-    <button class="botao-verde" onclick="encerrarAposta()">Encerrar Aposta</button>
-  </div>
+<!-- Modal -->
+<div class="modal" id="modalItem">
+  <div class="modal-content" id="modalConteudo"></div>
+</div>
 
-  <button class="logout" onclick="logout()">Sair</button>
+<script>
+  const form = document.getElementById('formItem');
+  const lista = document.getElementById('listaItens');
+  const busca = document.getElementById('busca');
+  const filtroTipo = document.getElementById('filtroTipo');
+  const filtroCategoria = document.getElementById('filtroCategoria');
+  const modal = document.getElementById('modalItem');
+  const modalConteudo = document.getElementById('modalConteudo');
+
+  let itens = JSON.parse(localStorage.getItem('itensAchados')) || [];
+
+  function toggleForm() {
+    form.style.display = form.style.display === 'flex' ? 'none' : 'flex';
+  }
+
+  function salvarItem() {
+    const reader = new FileReader();
+    const arquivo = document.getElementById('foto').files[0];
+    reader.onloadend = () => {
+      const item = {
+        id: Date.now(),
+        tipo: document.getElementById('tipo').value,
+        categoria: document.getElementById('categoria').value,
+        descricao: document.getElementById('descricao').value,
+        local: document.getElementById('local').value,
+        data: document.getElementById('data').value,
+        contato: document.getElementById('contato').value,
+        foto: reader.result
+      };
+      itens.push(item);
+      localStorage.setItem('itensAchados', JSON.stringify(itens));
+      form.reset();
+      form.style.display = 'none';
+      renderizarItens();
+    };
+    if (arquivo) reader.readAsDataURL(arquivo);
+    else reader.onloadend();
+  }
+
+  function renderizarItens() {
+    lista.innerHTML = '';
+    const filtroBusca = busca.value.toLowerCase();
+    const tipoSel = filtroTipo.value;
+    const catSel = filtroCategoria.value;
+    const filtrados = itens.filter(i =>
+      (!tipoSel || i.tipo === tipoSel) &&
+      (!catSel || i.categoria === catSel) &&
+      (i.descricao.toLowerCase().includes(filtroBusca) || i.local.toLowerCase().includes(filtroBusca))
+    );
+    filtrados.reverse().forEach(i => {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = `
+        <img src="${i.foto || 'https://via.placeholder.com/300x160?text=Sem+Imagem'}" alt="${i.descricao}">
+        <h3>${i.descricao}</h3>
+        <span class="tag ${i.tipo}">${i.tipo.toUpperCase()}</span>
+        <p>${i.categoria}</p>
+        <button class="btn btn-add" onclick="verItem(${i.id})">Ver Detalhes</button>
+      `;
+      lista.appendChild(div);
+    });
+  }
+
+  function verItem(id) {
+    const i = itens.find(x => x.id === id);
+    modalConteudo.innerHTML = `
+      <img src="${i.foto || 'https://via.placeholder.com/300x160?text=Sem+Imagem'}">
+      <h3>${i.descricao}</h3>
+      <p><b>Tipo:</b> ${i.tipo}</p>
+      <p><b>Categoria:</b> ${i.categoria}</p>
+      <p><b>Local:</b> ${i.local}</p>
+      <p><b>Data:</b> ${i.data}</p>
+      <p><b>Contato:</b> ${i.contato}</p>
+      <button class="close-btn" onclick="modal.style.display='none'">Fechar</button>
+    `;
+    modal.style.display = 'flex';
+  }
+
+  function limparTudo() {
+    if (confirm('Tem certeza que deseja apagar todos os registros?')) {
+      localStorage.removeItem('itensAchados');
+      itens = [];
+      renderizarItens();
+    }
+  }
+
+  busca.oninput = filtroTipo.onchange = filtroCategoria.onchange = renderizarItens;
+  document.getElementById('ano').textContent = new Date().getFullYear();
+  renderizarItens();
+</script>
+
 </body>
 </html>
