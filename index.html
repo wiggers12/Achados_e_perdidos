@@ -121,6 +121,29 @@
   .modal-content img{width:100%;border-radius:8px;margin-bottom:10px;}
   .modal-content h3{color:#ff7a00;margin-top:0;}
   .close-btn{background:#ff7a00;border:none;padding:8px 16px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:10px;}
+
+  /* ======== BOTÃO WHATSAPP ======== */
+  .whatsapp-float {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #25D366;
+    color: white;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    z-index: 2000;
+    transition: transform 0.3s ease;
+  }
+  .whatsapp-float:hover {
+    transform: scale(1.1);
+    background: #1ebe5d;
+  }
 </style>
 </head>
 <body>
@@ -188,6 +211,11 @@
     <div class="modal-content" id="modalConteudo"></div>
   </div>
 </div>
+
+<!-- BOTÃO FLUTUANTE WHATSAPP -->
+<a href="https://wa.me/5551994307565" class="whatsapp-float" target="_blank" title="Fale conosco no WhatsApp">
+  <i class="fab fa-whatsapp"></i>
+</a>
 
 <script>
   // --- Tela Inicial ---
