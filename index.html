@@ -4,9 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Achados & Perdidos - App Inteligente</title>
-<!-- Ícone e Manifest -->
-<link rel="manifest" href="manifest.json">
+
+<!-- Ícones e Manifest -->
+<link rel="icon" type="image/x-icon" href="icon-512.ico">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f141a">
 
 <!-- Fontes e Ícones -->
@@ -17,147 +21,100 @@
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Inter',sans-serif;background:#0f141a;color:#eaf2f8;}
 
-  /* ======== TELA INICIAL ======== */
+  /* ===== Tela Inicial ===== */
   #telaInicio {
-    position:fixed;
-    top:0;left:0;width:100%;height:100%;
-    background:#000;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    overflow:hidden;
-    z-index:999;
-    transition:opacity 0.8s ease;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:#000;display:flex;justify-content:center;align-items:center;
+    overflow:hidden;z-index:999;transition:opacity 0.8s ease;
   }
-  #telaInicio img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    filter:brightness(0.5);
+  #telaInicio img{width:100%;height:100%;object-fit:cover;filter:brightness(0.5);}
+  #telaInicio .overlay{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+    text-align:center;background:rgba(0,0,0,0.4);
   }
-  #telaInicio .overlay {
-    position:absolute;
-    top:0;left:0;width:100%;height:100%;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    background:rgba(0,0,0,0.4);
-  }
-  #telaInicio h1 {
-    color:#ff7a00;
-    font-size:2.2rem;
-    margin-bottom:10px;
-  }
-  #telaInicio p {
-    color:#ccc;
-    max-width:320px;
-    margin-bottom:25px;
-  }
-  #telaInicio button {
-    background:#ff7a00;
-    color:#111;
-    font-weight:700;
-    border:none;
-    padding:12px 28px;
-    border-radius:8px;
-    font-size:1rem;
-    cursor:pointer;
+  #telaInicio h1{color:#ff7a00;font-size:2.2rem;margin-bottom:10px;}
+  #telaInicio p{color:#ccc;max-width:320px;margin-bottom:25px;}
+  #telaInicio button{
+    background:#ff7a00;color:#111;font-weight:700;border:none;
+    padding:12px 28px;border-radius:8px;font-size:1rem;cursor:pointer;
     transition:0.3s;
   }
-  #telaInicio button:hover { background:#ffaa33; }
+  #telaInicio button:hover{background:#ffaa33;}
 
-  /* ======== APP PRINCIPAL ======== */
-  header {
-    background:#1b242d;padding:15px;text-align:center;font-weight:700;font-size:1.3rem;
-    color:#ff7a00;box-shadow:0 2px 10px rgba(0,0,0,0.4);
-  }
-  main {padding:20px;max-width:800px;margin:auto;}
+  /* ===== App Principal ===== */
+  header{background:#1b242d;padding:15px;text-align:center;font-weight:700;
+    font-size:1.3rem;color:#ff7a00;box-shadow:0 2px 10px rgba(0,0,0,0.4);}
+  main{padding:20px;max-width:800px;margin:auto;}
   h2{text-align:center;color:#ff7a00;margin-bottom:10px;}
 
-  .btn {
-    padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-weight:600;
-    transition:0.2s;font-size:0.95rem;
-  }
+  .btn{padding:10px 18px;border-radius:8px;border:none;cursor:pointer;
+    font-weight:600;transition:0.2s;font-size:0.95rem;}
   .btn:hover{opacity:0.8;}
   .btn-add{background:#ff7a00;color:#111;margin-bottom:15px;}
   .btn-clear{background:#444;color:#fff;margin-top:10px;}
 
-  form {
-    display:none;flex-direction:column;gap:10px;background:#18222c;padding:20px;border-radius:10px;margin-bottom:20px;
+  form{
+    display:none;flex-direction:column;gap:10px;background:#18222c;
+    padding:20px;border-radius:10px;margin-bottom:20px;
   }
-  input,select,textarea {
-    padding:10px;border-radius:6px;border:1px solid #333;background:#111820;color:#fff;width:100%;
+  input,select,textarea{
+    padding:10px;border-radius:6px;border:1px solid #333;background:#111820;
+    color:#fff;width:100%;
   }
   label{font-weight:600;color:#ccc;}
 
-  .filtros {
+  .filtros{
     display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;
   }
-  .filtros select,.filtros input {
+  .filtros select,.filtros input{
     background:#111820;border:1px solid #333;border-radius:8px;color:#fff;padding:8px;
   }
 
-  .grid {
+  .grid{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;
   }
-  .card {
+  .card{
     background:#18222c;border-radius:10px;padding:15px;text-align:center;
     box-shadow:0 2px 10px rgba(0,0,0,0.3);
   }
-  .card img {
-    width:100%;height:160px;object-fit:cover;border-radius:8px;
-  }
+  .card img{width:100%;height:160px;object-fit:cover;border-radius:8px;}
   .card h3{margin:10px 0 5px;}
-  .tag {
-    display:inline-block;padding:5px 10px;border-radius:8px;font-size:0.8rem;font-weight:bold;margin:5px;
-  }
+  .tag{display:inline-block;padding:5px 10px;border-radius:8px;font-size:0.8rem;
+    font-weight:bold;margin:5px;}
   .perdido{background:#ff4d4d;color:#fff;}
   .achado{background:#00c851;color:#fff;}
 
   footer{text-align:center;padding:15px;font-size:0.8rem;background:#111820;color:#aaa;margin-top:30px;}
 
-  .modal {
+  .modal{
     position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.8);display:none;justify-content:center;align-items:center;z-index:1000;
+    background:rgba(0,0,0,0.8);display:none;justify-content:center;
+    align-items:center;z-index:1000;
   }
-  .modal-content {
+  .modal-content{
     background:#1b242d;padding:20px;border-radius:10px;max-width:400px;width:90%;
   }
   .modal-content img{width:100%;border-radius:8px;margin-bottom:10px;}
   .modal-content h3{color:#ff7a00;margin-top:0;}
-  .close-btn{background:#ff7a00;border:none;padding:8px 16px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:10px;}
+  .close-btn{background:#ff7a00;border:none;padding:8px 16px;border-radius:8px;
+    font-weight:bold;cursor:pointer;margin-top:10px;}
 
-  /* ======== BOTÃO WHATSAPP ======== */
-  .whatsapp-float {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #25D366;
-    color: white;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    z-index: 2000;
-    transition: transform 0.3s ease;
+  /* ===== Botão WhatsApp ===== */
+  .whatsapp-float{
+    position:fixed;bottom:20px;right:20px;background:#25D366;color:white;
+    border-radius:50%;width:60px;height:60px;display:flex;align-items:center;
+    justify-content:center;font-size:28px;box-shadow:0 4px 10px rgba(0,0,0,0.4);
+    z-index:2000;transition:transform 0.3s ease;
   }
-  .whatsapp-float:hover {
-    transform: scale(1.1);
-    background: #1ebe5d;
-  }
+  .whatsapp-float:hover{transform:scale(1.1);background:#1ebe5d;}
 </style>
 </head>
 <body>
 
-<!-- ========== TELA INICIAL ========== -->
+<!-- Tela inicial -->
 <div id="telaInicio">
-  <img src="perdido.jpg" alt="Celular perdido">
+  <img src="imagem.jpg" alt="Celular perdido">
   <div class="overlay">
     <h1>Achados & Perdidos</h1>
     <p>Conectando pessoas e objetos perdidos com rapidez e segurança.</p>
@@ -165,7 +122,7 @@
   </div>
 </div>
 
-<!-- ========== APP PRINCIPAL ========== -->
+<!-- App principal -->
 <div id="app" style="display:none;">
   <header><i class="fas fa-search"></i> Achados & Perdidos</header>
   <main>
@@ -180,7 +137,8 @@
       </select>
       <label>Categoria:</label>
       <select id="categoria">
-        <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
+        <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option>
+        <option>Carteiras</option><option>Outros</option>
       </select>
       <label>Descrição:</label>
       <textarea id="descricao" rows="3" placeholder="Descreva o item"></textarea>
@@ -198,13 +156,12 @@
     <div class="filtros">
       <input id="busca" type="text" placeholder="Buscar..."/>
       <select id="filtroTipo">
-        <option value="">Todos</option>
-        <option value="perdido">Perdido</option>
-        <option value="achado">Achado</option>
+        <option value="">Todos</option><option value="perdido">Perdido</option><option value="achado">Achado</option>
       </select>
       <select id="filtroCategoria">
         <option value="">Todas categorias</option>
-        <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option><option>Carteiras</option><option>Outros</option>
+        <option>Documentos</option><option>Eletrônicos</option><option>Chaves</option>
+        <option>Carteiras</option><option>Outros</option>
       </select>
     </div>
 
@@ -219,104 +176,98 @@
   </div>
 </div>
 
-<!-- BOTÃO FLUTUANTE WHATSAPP -->
+<!-- Botão flutuante WhatsApp -->
 <a href="https://wa.me/5551994307565" class="whatsapp-float" target="_blank" title="Fale conosco no WhatsApp">
   <i class="fab fa-whatsapp"></i>
 </a>
 
 <script>
-  // --- Tela Inicial ---
-  function entrarApp() {
-    const tela = document.getElementById('telaInicio');
-    tela.style.opacity = '0';
-    setTimeout(() => {
-      tela.style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-    }, 800);
-  }
+function entrarApp(){
+  const tela=document.getElementById('telaInicio');
+  tela.style.opacity='0';
+  setTimeout(()=>{tela.style.display='none';document.getElementById('app').style.display='block';},800);
+}
 
-  // --- App Principal ---
-  const form = document.getElementById('formItem');
-  const lista = document.getElementById('listaItens');
-  const busca = document.getElementById('busca');
-  const filtroTipo = document.getElementById('filtroTipo');
-  const filtroCategoria = document.getElementById('filtroCategoria');
-  const modal = document.getElementById('modalItem');
-  const modalConteudo = document.getElementById('modalConteudo');
+const form=document.getElementById('formItem');
+const lista=document.getElementById('listaItens');
+const busca=document.getElementById('busca');
+const filtroTipo=document.getElementById('filtroTipo');
+const filtroCategoria=document.getElementById('filtroCategoria');
+const modal=document.getElementById('modalItem');
+const modalConteudo=document.getElementById('modalConteudo');
 
-  let itens = JSON.parse(localStorage.getItem('itensAchados')) || [];
+let itens=JSON.parse(localStorage.getItem('itensAchados'))||[];
 
-  function toggleForm(){form.style.display=form.style.display==='flex'?'none':'flex';}
+function toggleForm(){form.style.display=form.style.display==='flex'?'none':'flex';}
 
-  function salvarItem(){
-    const reader=new FileReader();
-    const arquivo=document.getElementById('foto').files[0];
-    reader.onloadend=()=>{
-      const item={
-        id:Date.now(),
-        tipo:document.getElementById('tipo').value,
-        categoria:document.getElementById('categoria').value,
-        descricao:document.getElementById('descricao').value,
-        local:document.getElementById('local').value,
-        data:document.getElementById('data').value,
-        contato:document.getElementById('contato').value,
-        foto:reader.result
-      };
-      itens.push(item);
-      localStorage.setItem('itensAchados',JSON.stringify(itens));
-      form.reset();form.style.display='none';renderizarItens();
+function salvarItem(){
+  const reader=new FileReader();
+  const arquivo=document.getElementById('foto').files[0];
+  reader.onloadend=()=>{
+    const item={
+      id:Date.now(),
+      tipo:document.getElementById('tipo').value,
+      categoria:document.getElementById('categoria').value,
+      descricao:document.getElementById('descricao').value,
+      local:document.getElementById('local').value,
+      data:document.getElementById('data').value,
+      contato:document.getElementById('contato').value,
+      foto:reader.result
     };
-    if(arquivo)reader.readAsDataURL(arquivo);else reader.onloadend();
-  }
+    itens.push(item);
+    localStorage.setItem('itensAchados',JSON.stringify(itens));
+    form.reset();form.style.display='none';renderizarItens();
+  };
+  if(arquivo)reader.readAsDataURL(arquivo);else reader.onloadend();
+}
 
-  function renderizarItens(){
-    lista.innerHTML='';
-    const filtroBusca=busca.value.toLowerCase();
-    const tipoSel=filtroTipo.value;
-    const catSel=filtroCategoria.value;
-    const filtrados=itens.filter(i=>
-      (!tipoSel||i.tipo===tipoSel)&&
-      (!catSel||i.categoria===catSel)&&
-      (i.descricao.toLowerCase().includes(filtroBusca)||i.local.toLowerCase().includes(filtroBusca))
-    );
-    filtrados.reverse().forEach(i=>{
-      const div=document.createElement('div');
-      div.className='card';
-      div.innerHTML=`
-        <img src="${i.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}" alt="${i.descricao}">
-        <h3>${i.descricao}</h3>
-        <span class="tag ${i.tipo}">${i.tipo.toUpperCase()}</span>
-        <p>${i.categoria}</p>
-        <button class="btn btn-add" onclick="verItem(${i.id})">Ver Detalhes</button>`;
-      lista.appendChild(div);
-    });
-  }
-
-  function verItem(id){
-    const i=itens.find(x=>x.id===id);
-    modalConteudo.innerHTML=`
-      <img src="${i.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}">
+function renderizarItens(){
+  lista.innerHTML='';
+  const filtroBusca=busca.value.toLowerCase();
+  const tipoSel=filtroTipo.value;
+  const catSel=filtroCategoria.value;
+  const filtrados=itens.filter(i=>
+    (!tipoSel||i.tipo===tipoSel)&&(!catSel||i.categoria===catSel)&&
+    (i.descricao.toLowerCase().includes(filtroBusca)||i.local.toLowerCase().includes(filtroBusca))
+  );
+  filtrados.reverse().forEach(i=>{
+    const div=document.createElement('div');
+    div.className='card';
+    div.innerHTML=`
+      <img src="${i.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}" alt="${i.descricao}">
       <h3>${i.descricao}</h3>
-      <p><b>Tipo:</b> ${i.tipo}</p>
-      <p><b>Categoria:</b> ${i.categoria}</p>
-      <p><b>Local:</b> ${i.local}</p>
-      <p><b>Data:</b> ${i.data}</p>
-      <p><b>Contato:</b> ${i.contato}</p>
-      <button class="close-btn" onclick="modal.style.display='none'">Fechar</button>`;
-    modal.style.display='flex';
+      <span class="tag ${i.tipo}">${i.tipo.toUpperCase()}</span>
+      <p>${i.categoria}</p>
+      <button class="btn btn-add" onclick="verItem(${i.id})">Ver Detalhes</button>`;
+    lista.appendChild(div);
+  });
+}
+
+function verItem(id){
+  const i=itens.find(x=>x.id===id);
+  modalConteudo.innerHTML=`
+    <img src="${i.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}">
+    <h3>${i.descricao}</h3>
+    <p><b>Tipo:</b> ${i.tipo}</p>
+    <p><b>Categoria:</b> ${i.categoria}</p>
+    <p><b>Local:</b> ${i.local}</p>
+    <p><b>Data:</b> ${i.data}</p>
+    <p><b>Contato:</b> ${i.contato}</p>
+    <button class="close-btn" onclick="modal.style.display='none'">Fechar</button>`;
+  modal.style.display='flex';
+}
+
+function limparTudo(){
+  if(confirm('Tem certeza que deseja apagar todos os registros?')){
+    localStorage.removeItem('itensAchados');itens=[];renderizarItens();
   }
+}
 
-  function limparTudo(){
-    if(confirm('Tem certeza que deseja apagar todos os registros?')){
-      localStorage.removeItem('itensAchados');itens=[];renderizarItens();
-    }
-  }
+busca.oninput=filtroTipo.onchange=filtroCategoria.onchange=renderizarItens;
+document.getElementById('ano').textContent=new Date().getFullYear();
+renderizarItens();
 
-  busca.oninput=filtroTipo.onchange=filtroCategoria.onchange=renderizarItens;
-  document.getElementById('ano').textContent=new Date().getFullYear();
-  renderizarItens();
-
- // PWA
+// PWA
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('service-worker.js')
   .then(()=>console.log('✅ Service Worker ativo'))
