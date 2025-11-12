@@ -4,111 +4,66 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Achados & Perdidos - App Inteligente</title>
-
-<!-- Ícones e Manifest -->
 <link rel="icon" type="image/x-icon" href="icon-512.ico">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="apple-touch-icon" href="icon-512.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f141a">
-
-<!-- Fontes e Ícones -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://kit.fontawesome.com/a2d9d5a4f1.js" crossorigin="anonymous"></script>
 
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   body{font-family:'Inter',sans-serif;background:#0f141a;color:#eaf2f8;}
-
-  #telaInicio {
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background:#000;display:flex;justify-content:center;align-items:center;
-    overflow:hidden;z-index:999;transition:opacity 0.8s ease;
-  }
+  #telaInicio{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;
+    display:flex;justify-content:center;align-items:center;z-index:999;transition:opacity .8s ease;}
   #telaInicio img{width:100%;height:100%;object-fit:cover;filter:brightness(0.5);}
-  #telaInicio .overlay{
-    position:absolute;top:0;left:0;width:100%;height:100%;
-    display:flex;flex-direction:column;justify-content:center;align-items:center;
-    text-align:center;background:rgba(0,0,0,0.4);
-  }
+  #telaInicio .overlay{position:absolute;top:0;left:0;width:100%;height:100%;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;background:rgba(0,0,0,0.4);}
   #telaInicio h1{color:#ff7a00;font-size:2.2rem;margin-bottom:10px;}
   #telaInicio p{color:#ccc;max-width:320px;margin-bottom:25px;}
-  #telaInicio button{
-    background:#ff7a00;color:#111;font-weight:700;border:none;
-    padding:12px 28px;border-radius:8px;font-size:1rem;cursor:pointer;
-    transition:0.3s;
-  }
+  #telaInicio button{background:#ff7a00;color:#111;font-weight:700;border:none;
+    padding:12px 28px;border-radius:8px;font-size:1rem;cursor:pointer;transition:.3s;}
   #telaInicio button:hover{background:#ffaa33;}
-
   header{background:#1b242d;padding:15px;text-align:center;font-weight:700;
     font-size:1.3rem;color:#ff7a00;box-shadow:0 2px 10px rgba(0,0,0,0.4);}
   main{padding:20px;max-width:800px;margin:auto;}
-  h2{text-align:center;color:#ff7a00;margin-bottom:10px;}
-
   .btn{padding:10px 18px;border-radius:8px;border:none;cursor:pointer;
     font-weight:600;transition:0.2s;font-size:0.95rem;}
   .btn:hover{opacity:0.8;}
   .btn-add{background:#ff7a00;color:#111;margin-bottom:15px;}
   .btn-clear{background:#444;color:#fff;margin-top:10px;}
-
-  form{
-    display:none;flex-direction:column;gap:10px;background:#18222c;
-    padding:20px;border-radius:10px;margin-bottom:20px;
-  }
-  input,select,textarea{
-    padding:10px;border-radius:6px;border:1px solid #333;background:#111820;
-    color:#fff;width:100%;
-  }
+  .btn-voltar{background:#555;color:#fff;margin-top:10px;}
+  form{display:none;flex-direction:column;gap:10px;background:#18222c;padding:20px;
+    border-radius:10px;margin-bottom:20px;}
+  input,select,textarea{padding:10px;border-radius:6px;border:1px solid #333;
+    background:#111820;color:#fff;width:100%;}
   label{font-weight:600;color:#ccc;}
-
-  .filtros{
-    display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;
-  }
-  .filtros select,.filtros input{
-    background:#111820;border:1px solid #333;border-radius:8px;color:#fff;padding:8px;
-  }
-
-  .grid{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;
-  }
-  .card{
-    background:#18222c;border-radius:10px;padding:15px;text-align:center;
-    box-shadow:0 2px 10px rgba(0,0,0,0.3);
-  }
+  .filtros{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;}
+  .filtros select,.filtros input{background:#111820;border:1px solid #333;border-radius:8px;color:#fff;padding:8px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;}
+  .card{background:#18222c;border-radius:10px;padding:15px;text-align:center;
+    box-shadow:0 2px 10px rgba(0,0,0,0.3);}
   .card img{width:100%;height:160px;object-fit:cover;border-radius:8px;}
   .card h3{margin:10px 0 5px;}
   .tag{display:inline-block;padding:5px 10px;border-radius:8px;font-size:0.8rem;
     font-weight:bold;margin:5px;}
   .perdido{background:#ff4d4d;color:#fff;}
   .achado{background:#00c851;color:#fff;}
-
   footer{text-align:center;padding:15px;font-size:0.8rem;background:#111820;color:#aaa;margin-top:30px;}
-
-  .modal{
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.8);display:none;justify-content:center;
-    align-items:center;z-index:1000;
-  }
-  .modal-content{
-    background:#1b242d;padding:20px;border-radius:10px;max-width:400px;width:90%;
-  }
+  .modal{position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.8);display:none;justify-content:center;align-items:center;z-index:1000;}
+  .modal-content{background:#1b242d;padding:20px;border-radius:10px;max-width:400px;width:90%;}
   .modal-content img{width:100%;border-radius:8px;margin-bottom:10px;}
   .modal-content h3{color:#ff7a00;margin-top:0;}
-  .close-btn{background:#ff7a00;border:none;padding:8px 16px;border-radius:8px;
-    font-weight:bold;cursor:pointer;margin-top:10px;}
-
-  .whatsapp-float{
-    position:fixed;bottom:20px;right:20px;background:#25D366;color:white;
-    border-radius:50%;width:60px;height:60px;display:flex;align-items:center;
-    justify-content:center;font-size:28px;box-shadow:0 4px 10px rgba(0,0,0,0.4);
-    z-index:2000;transition:transform 0.3s ease;
-  }
+  .close-btn{background:#ff7a00;border:none;padding:8px 16px;border-radius:8px;font-weight:bold;cursor:pointer;margin-top:10px;}
+  .whatsapp-float{position:fixed;bottom:20px;right:20px;background:#25D366;color:white;border-radius:50%;
+    width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:28px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.4);z-index:2000;transition:transform 0.3s ease;}
   .whatsapp-float:hover{transform:scale(1.1);background:#1ebe5d;}
 </style>
 </head>
 <body>
 
+<!-- TELA INICIAL -->
 <div id="telaInicio">
   <img src="perdido.jpg" alt="Celular perdido">
   <div class="overlay">
@@ -118,6 +73,7 @@
   </div>
 </div>
 
+<!-- APP PRINCIPAL -->
 <div id="app" style="display:none;">
   <header><i class="fas fa-search"></i> Achados & Perdidos</header>
   <main>
@@ -146,6 +102,7 @@
       <label>Foto:</label>
       <input id="foto" type="file" accept="image/*"/>
       <button class="btn btn-add" type="button" id="salvarBtn">Salvar Item</button>
+      <button class="btn btn-voltar" type="button" id="voltarInicioBtn" style="display:none;">⬅ Voltar ao Início</button>
     </form>
 
     <div class="filtros">
@@ -163,7 +120,6 @@
     <div class="grid" id="listaItens"></div>
     <button class="btn btn-clear" id="limparBtn">🗑 Limpar Tudo</button>
   </main>
-
   <footer>© <span id="ano"></span> App Achados & Perdidos</footer>
 
   <div class="modal" id="modalItem">
@@ -176,9 +132,6 @@
 </a>
 
 <script type="module">
-// ==========================
-// 🔥 Firebase correto
-// ==========================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -197,9 +150,6 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
-// ==========================
-// 🌍 Funções Globais
-// ==========================
 function entrarApp(){
   const tela=document.getElementById('telaInicio');
   tela.style.opacity='0';
@@ -213,12 +163,10 @@ window.entrarApp = entrarApp;
 function toggleForm(){
   const form=document.getElementById('formItem');
   form.style.display=form.style.display==='flex'?'none':'flex';
+  document.getElementById('voltarInicioBtn').style.display='none';
 }
 window.toggleForm = toggleForm;
 
-// ==========================
-// 🔧 Variáveis
-// ==========================
 const form=document.getElementById('formItem');
 const lista=document.getElementById('listaItens');
 const busca=document.getElementById('busca');
@@ -226,11 +174,9 @@ const filtroTipo=document.getElementById('filtroTipo');
 const filtroCategoria=document.getElementById('filtroCategoria');
 const modal=document.getElementById('modalItem');
 const modalConteudo=document.getElementById('modalConteudo');
+const voltarBtn=document.getElementById('voltarInicioBtn');
 const colRef=collection(db,"itensAchados");
 
-// ==========================
-// 💾 Salvar Item
-// ==========================
 async function salvarItem(){
   const arquivo=document.getElementById('foto').files[0];
   const reader=new FileReader();
@@ -246,31 +192,32 @@ async function salvarItem(){
     };
     await addDoc(colRef,novoItem);
     alert('✅ Item salvo com sucesso!');
-    form.reset();form.style.display='none';
+    form.reset();
+    document.getElementById('voltarInicioBtn').style.display='block';
     renderizarItens();
   };
   if(arquivo) reader.readAsDataURL(arquivo); else reader.onloadend();
 }
 
-// ==========================
-// 📋 Renderizar Itens
-// ==========================
+voltarBtn.onclick = ()=>{
+  form.style.display='none';
+  voltarBtn.style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+
 async function renderizarItens(){
   lista.innerHTML="<p style='text-align:center;color:#888;'>Carregando...</p>";
   const querySnap=await getDocs(colRef);
   const itens=[];
   querySnap.forEach(docSnap=>itens.push({id:docSnap.id,...docSnap.data()}));
-
   const filtroBusca=busca.value.toLowerCase();
   const tipoSel=filtroTipo.value;
   const catSel=filtroCategoria.value;
-
   const filtrados=itens.filter(i=>
     (!tipoSel||i.tipo===tipoSel)&&
     (!catSel||i.categoria===catSel)&&
     ((i.descricao?.toLowerCase().includes(filtroBusca))||(i.local?.toLowerCase().includes(filtroBusca)))
   );
-
   lista.innerHTML='';
   filtrados.reverse().forEach(i=>{
     const div=document.createElement('div');
@@ -285,9 +232,6 @@ async function renderizarItens(){
   });
 }
 
-// ==========================
-// 🔍 Ver Detalhes
-// ==========================
 window.verItem=async function(id){
   const querySnap=await getDocs(colRef);
   let item;
@@ -305,9 +249,6 @@ window.verItem=async function(id){
   modal.style.display='flex';
 };
 
-// ==========================
-// 🗑 Limpar Tudo
-// ==========================
 async function limparTudo(){
   if(confirm('Tem certeza que deseja apagar todos os registros?')){
     const snap=await getDocs(colRef);
@@ -317,20 +258,11 @@ async function limparTudo(){
   }
 }
 
-// ==========================
-// ⚙️ Eventos
-// ==========================
 document.getElementById('salvarBtn').onclick=salvarItem;
 document.getElementById('limparBtn').onclick=limparTudo;
 busca.oninput=filtroTipo.onchange=filtroCategoria.onchange=renderizarItens;
 document.getElementById('ano').textContent=new Date().getFullYear();
 renderizarItens();
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js')
-  .then(()=>console.log('✅ Service Worker ativo'))
-  .catch(err=>console.log('❌ Erro SW:',err));
-}
 </script>
 </body>
 </html>
