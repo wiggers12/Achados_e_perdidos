@@ -7,8 +7,8 @@
 
 <!-- Ícones e Manifest -->
 <link rel="icon" type="image/x-icon" href="icon-512.ico">
-<link rel="icon" type="perdido/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="perdido/png" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f141a">
@@ -150,7 +150,7 @@
       <input id="contato" type="text" placeholder="(51) 99999-9999"/>
       <label>Foto:</label>
       <input id="foto" type="file" accept="image/*"/>
-      <button class="btn btn-add" type="button" onclick="salvarItem()">Salvar Item</button>
+      <button class="btn btn-add" type="button" id="salvarBtn">Salvar Item</button>
     </form>
 
     <div class="filtros">
@@ -166,7 +166,7 @@
     </div>
 
     <div class="grid" id="listaItens"></div>
-    <button class="btn btn-clear" onclick="limparTudo()">🗑 Limpar Tudo</button>
+    <button class="btn btn-clear" id="limparBtn">🗑 Limpar Tudo</button>
   </main>
 
   <footer>© <span id="ano"></span> App Achados & Perdidos</footer>
@@ -181,11 +181,39 @@
   <i class="fab fa-whatsapp"></i>
 </a>
 
-<script>
+<!-- FIREBASE E APP -->
+<script type="module">
+// ================================
+// IMPORTA FIREBASE
+// ================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBKlVI23YoxRb1fntQKy-ZfkzaDM-MWsSQ",
+  authDomain: "doce-sabor-caseiro.firebaseapp.com",
+  projectId: "doce-sabor-caseiro",
+  storageBucket: "doce-sabor-caseiro.appspot.com",
+  messagingSenderId: "414062499771",
+  appId: "1:414062499771:web:1a811377bc6bbf145f969e",
+  measurementId: "G-KMC0FC7Z4H"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ================================
+// LÓGICA DO APP
+// ================================
 function entrarApp(){
   const tela=document.getElementById('telaInicio');
   tela.style.opacity='0';
   setTimeout(()=>{tela.style.display='none';document.getElementById('app').style.display='block';},800);
+}
+
+function toggleForm(){
+  const form=document.getElementById('formItem');
+  form.style.display=form.style.display==='flex'?'none':'flex';
 }
 
 const form=document.getElementById('formItem');
@@ -195,41 +223,52 @@ const filtroTipo=document.getElementById('filtroTipo');
 const filtroCategoria=document.getElementById('filtroCategoria');
 const modal=document.getElementById('modalItem');
 const modalConteudo=document.getElementById('modalConteudo');
+const colRef=collection(db,"itensAchados");
 
-let itens=JSON.parse(localStorage.getItem('itensAchados'))||[];
-
-function toggleForm(){form.style.display=form.style.display==='flex'?'none':'flex';}
-
-function salvarItem(){
-  const reader=new FileReader();
+// ================================
+// SALVAR ITEM
+// ================================
+async function salvarItem(){
   const arquivo=document.getElementById('foto').files[0];
-  reader.onloadend=()=>{
-    const item={
-      id:Date.now(),
+  const reader=new FileReader();
+  reader.onloadend=async()=>{
+    const novoItem={
       tipo:document.getElementById('tipo').value,
       categoria:document.getElementById('categoria').value,
       descricao:document.getElementById('descricao').value,
       local:document.getElementById('local').value,
       data:document.getElementById('data').value,
       contato:document.getElementById('contato').value,
-      foto:reader.result
+      foto:reader.result||null
     };
-    itens.push(item);
-    localStorage.setItem('itensAchados',JSON.stringify(itens));
-    form.reset();form.style.display='none';renderizarItens();
+    await addDoc(colRef,novoItem);
+    alert('✅ Item salvo com sucesso!');
+    form.reset();form.style.display='none';
+    renderizarItens();
   };
-  if(arquivo)reader.readAsDataURL(arquivo);else reader.onloadend();
+  if(arquivo) reader.readAsDataURL(arquivo); else reader.onloadend();
 }
 
-function renderizarItens(){
-  lista.innerHTML='';
+// ================================
+// RENDERIZAR ITENS
+// ================================
+async function renderizarItens(){
+  lista.innerHTML="<p style='text-align:center;color:#888;'>Carregando...</p>";
+  const querySnap=await getDocs(colRef);
+  const itens=[];
+  querySnap.forEach(docSnap=>itens.push({id:docSnap.id,...docSnap.data()}));
+
   const filtroBusca=busca.value.toLowerCase();
   const tipoSel=filtroTipo.value;
   const catSel=filtroCategoria.value;
+
   const filtrados=itens.filter(i=>
-    (!tipoSel||i.tipo===tipoSel)&&(!catSel||i.categoria===catSel)&&
-    (i.descricao.toLowerCase().includes(filtroBusca)||i.local.toLowerCase().includes(filtroBusca))
+    (!tipoSel||i.tipo===tipoSel)&&
+    (!catSel||i.categoria===catSel)&&
+    ((i.descricao?.toLowerCase().includes(filtroBusca))||(i.local?.toLowerCase().includes(filtroBusca)))
   );
+
+  lista.innerHTML='';
   filtrados.reverse().forEach(i=>{
     const div=document.createElement('div');
     div.className='card';
@@ -238,36 +277,59 @@ function renderizarItens(){
       <h3>${i.descricao}</h3>
       <span class="tag ${i.tipo}">${i.tipo.toUpperCase()}</span>
       <p>${i.categoria}</p>
-      <button class="btn btn-add" onclick="verItem(${i.id})">Ver Detalhes</button>`;
+      <button class="btn btn-add" onclick="verItem('${i.id}')">Ver Detalhes</button>`;
     lista.appendChild(div);
   });
 }
 
-function verItem(id){
-  const i=itens.find(x=>x.id===id);
+// ================================
+// VER ITEM
+// ================================
+window.verItem=async function(id){
+  const querySnap=await getDocs(colRef);
+  let item;
+  querySnap.forEach(docSnap=>{if(docSnap.id===id)item={id:docSnap.id,...docSnap.data()};});
+  if(!item)return;
   modalConteudo.innerHTML=`
-    <img src="${i.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}">
-    <h3>${i.descricao}</h3>
-    <p><b>Tipo:</b> ${i.tipo}</p>
-    <p><b>Categoria:</b> ${i.categoria}</p>
-    <p><b>Local:</b> ${i.local}</p>
-    <p><b>Data:</b> ${i.data}</p>
-    <p><b>Contato:</b> ${i.contato}</p>
+    <img src="${item.foto||'https://via.placeholder.com/300x160?text=Sem+Imagem'}">
+    <h3>${item.descricao}</h3>
+    <p><b>Tipo:</b> ${item.tipo}</p>
+    <p><b>Categoria:</b> ${item.categoria}</p>
+    <p><b>Local:</b> ${item.local}</p>
+    <p><b>Data:</b> ${item.data}</p>
+    <p><b>Contato:</b> ${item.contato}</p>
     <button class="close-btn" onclick="modal.style.display='none'">Fechar</button>`;
   modal.style.display='flex';
-}
+};
 
-function limparTudo(){
+// ================================
+// LIMPAR TUDO
+// ================================
+async function limparTudo(){
   if(confirm('Tem certeza que deseja apagar todos os registros?')){
-    localStorage.removeItem('itensAchados');itens=[];renderizarItens();
+    const snap=await getDocs(colRef);
+    for(const docSnap of snap.docs){await deleteDoc(doc(db,"itensAchados",docSnap.id));}
+    alert('🗑 Todos os registros foram apagados.');
+    renderizarItens();
   }
 }
 
+// ================================
+// EVENTOS
+// ================================
+document.getElementById('salvarBtn').onclick=salvarItem;
+document.getElementById('limparBtn').onclick=limparTudo;
 busca.oninput=filtroTipo.onchange=filtroCategoria.onchange=renderizarItens;
 document.getElementById('ano').textContent=new Date().getFullYear();
+
+// ================================
+// INICIALIZA
+// ================================
 renderizarItens();
 
+// ================================
 // PWA
+// ================================
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('service-worker.js')
   .then(()=>console.log('✅ Service Worker ativo'))
