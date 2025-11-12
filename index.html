@@ -150,6 +150,9 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
+// ================================
+// ⚙️ Funções principais
+// ================================
 function entrarApp(){
   const tela=document.getElementById('telaInicio');
   tela.style.opacity='0';
@@ -167,6 +170,9 @@ function toggleForm(){
 }
 window.toggleForm = toggleForm;
 
+// ================================
+// 🔧 Variáveis
+// ================================
 const form=document.getElementById('formItem');
 const lista=document.getElementById('listaItens');
 const busca=document.getElementById('busca');
@@ -177,6 +183,9 @@ const modalConteudo=document.getElementById('modalConteudo');
 const voltarBtn=document.getElementById('voltarInicioBtn');
 const colRef=collection(db,"itensAchados");
 
+// ================================
+// 💾 Salvar Item
+// ================================
 async function salvarItem(){
   const arquivo=document.getElementById('foto').files[0];
   const reader=new FileReader();
@@ -205,6 +214,9 @@ voltarBtn.onclick = ()=>{
   window.scrollTo({top:0,behavior:'smooth'});
 };
 
+// ================================
+// 📋 Renderizar Itens
+// ================================
 async function renderizarItens(){
   lista.innerHTML="<p style='text-align:center;color:#888;'>Carregando...</p>";
   const querySnap=await getDocs(colRef);
@@ -232,6 +244,9 @@ async function renderizarItens(){
   });
 }
 
+// ================================
+// 🔍 Ver Item
+// ================================
 window.verItem=async function(id){
   const querySnap=await getDocs(colRef);
   let item;
@@ -245,10 +260,21 @@ window.verItem=async function(id){
     <p><b>Local:</b> ${item.local}</p>
     <p><b>Data:</b> ${item.data}</p>
     <p><b>Contato:</b> ${item.contato}</p>
-    <button class="close-btn" onclick="modal.style.display='none'">Fechar</button>`;
+    <button class="close-btn" onclick="fecharModal()">Fechar</button>`;
   modal.style.display='flex';
 };
 
+// ================================
+// ❌ Fechar Modal (correção principal)
+// ================================
+window.fecharModal = function(){
+  const modal=document.getElementById('modalItem');
+  modal.style.display='none';
+};
+
+// ================================
+// 🗑 Limpar Tudo
+// ================================
 async function limparTudo(){
   if(confirm('Tem certeza que deseja apagar todos os registros?')){
     const snap=await getDocs(colRef);
@@ -258,11 +284,20 @@ async function limparTudo(){
   }
 }
 
+// ================================
+// ⚙️ Eventos
+// ================================
 document.getElementById('salvarBtn').onclick=salvarItem;
 document.getElementById('limparBtn').onclick=limparTudo;
 busca.oninput=filtroTipo.onchange=filtroCategoria.onchange=renderizarItens;
 document.getElementById('ano').textContent=new Date().getFullYear();
 renderizarItens();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js')
+  .then(()=>console.log('✅ Service Worker ativo'))
+  .catch(err=>console.log('❌ Erro SW:',err));
+}
 </script>
 </body>
 </html>
